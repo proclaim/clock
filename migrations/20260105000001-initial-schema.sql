@@ -102,7 +102,7 @@ VALUES (
     'System Administrator',
     'admin@clock.local',
     'ADMIN',
-    '$2a$10$YQ7Y5YqzHZvGQ5N9K9uqXe7Bh5MHZOq5QhK7b5K7OqK7b5K7OqK7b',  -- admin123
+    '$2a$10$elBM7jbocib72jCGjCHlXeL8piito1kgstnlPwjyzpQHxWVIycYoG',  -- admin123
     true
 );
 
@@ -116,7 +116,7 @@ VALUES (
     'john.doe@clock.local',
     '555-0101',
     'STAFF',
-    '$2a$10$ZQ7Z5ZqzIZvGR5O9L9vqYf8Ci6NIZPq6RiL8c6L8PqL8c6L8PqL8c',  -- staff123
+    '$2a$10$fqRfnXJPoqlXeb9Ms/396.iFZmXZ24vLXQVeZ7nYDyeEOsVIISWpq',  -- staff123
     true
 );
 
@@ -130,7 +130,7 @@ VALUES (
     'jane.smith@clock.local',
     '555-0102',
     'STAFF',
-    '$2a$10$ZQ7Z5ZqzIZvGR5O9L9vqYf8Ci6NIZPq6RiL8c6L8PqL8c6L8PqL8c',  -- staff123
+    '$2a$10$fqRfnXJPoqlXeb9Ms/396.iFZmXZ24vLXQVeZ7nYDyeEOsVIISWpq',  -- staff123
     true
 );
 
