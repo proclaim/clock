@@ -1,0 +1,72 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+# Note: .env.prod contains production secrets and must never be committed
+
+# Backend
+clock-backend/main
+clock-backend/tmp/
+clock-backend/dbconfig.yml
+
+# Frontend
+clock-frontend/.next/
+clock-frontend/out/
+clock-frontend/build/
+clock-frontend/node_modules/
+clock-frontend/.DS_Store
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Database
+*.sql.bak
+*.dump
+
+# Uploads (if any)
+uploads/
+!uploads/.gitkeep
+
+# Test coverage
+coverage/
+*.coverprofile
+*.out
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go
+vendor/
+
+# Build outputs
+dist/
+build/

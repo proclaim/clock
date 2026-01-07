@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  clock_postgres_prod:
+    image: postgres:16-alpine
+    container_name: clock_postgres_prod
+    environment:
+      POSTGRES_USER: ${DB_USER:-clock_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_password_change_me}
+      POSTGRES_DB: ${DB_NAME:-clock}
+    ports:
+      - "5436:5432"
+    volumes:
+      - clock_postgres_prod_data:/var/lib/postgresql/data
+    networks:
+      - clock_internal_prod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-clock_user} -d ${DB_NAME:-clock}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend API Service
+  clock_backend_prod:
+    image: clock_backend_prod
+    container_name: clock_backend_prod
+    depends_on:
+      clock_postgres_prod:
+        condition: service_healthy
+    environment:
+      DB_HOST: clock_postgres_prod
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-clock_user}
+      DB_PASSWORD: ${DB_PASSWORD:-secure_password_change_me}
+      DB_NAME: ${DB_NAME:-clock}
+      DB_SSLMODE: disable
+      JWT_SECRET: ${JWT_SECRET:-change_me_32_chars_minimum}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_me_32_chars_minimum}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-2592000}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-2592000}
+      PORT: 8080
+      ENV: production
+      LOG_LEVEL: info
+      FRONTEND_URL: ${FRONTEND_URL:-http://time.tcode.tw}
+    networks:
+      - clock_internal_prod
+      - clock_web_prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/v1/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Service
+  clock_frontend_prod:
+    image: clock_frontend_prod
+    container_name: clock_frontend_prod
+    depends_on:
+      - clock_backend_prod
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://time.tcode.tw/api/v1}
+      NODE_ENV: production
+    networks:
+      - clock_web_prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx Reverse Proxy
+  clock_nginx_prod:
+    image: nginx:alpine
+    container_name: clock_nginx_prod
+    depends_on:
+      - clock_frontend_prod
+      - clock_backend_prod
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/prod/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - clock_web_prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# Named Volumes for data persistence
+volumes:
+  clock_postgres_prod_data:
+    name: clock_postgres_prod_data
+
+# Networks for service isolation
+networks:
+  clock_internal_prod:
+    name: clock_internal_prod
+    driver: bridge
+  clock_web_prod:
+    name: clock_web_prod
+    driver: bridge
