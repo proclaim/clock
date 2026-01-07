@@ -9,7 +9,8 @@ WORKDIR /app
 # Copy go mod files
 COPY go.mod go.sum ./
 
-# Download dependencies
+# Download dependencies (allow Go to download required toolchain)
+ENV GOTOOLCHAIN=auto
 RUN go mod download
 
 # Copy source code
