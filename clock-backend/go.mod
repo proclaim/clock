@@ -10,7 +10,7 @@ require (
 	github.com/iris-contrib/middleware/cors v0.0.0-20220417122231-60b1fdb1e02b
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
-	github.com/kataras/iris/v12 v12.2.7
+	github.com/kataras/iris/v12 v12.2.11
 	github.com/lib/pq v1.10.9
 	go.uber.org/zap v1.27.1
 	golang.org/x/crypto v0.46.0
@@ -48,7 +48,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
-	github.com/tdewolff/minify/v2 v2.20.0 // indirect
+	github.com/tdewolff/minify/v2 v2.24.8 // indirect
 	github.com/tdewolff/parse/v2 v2.8.5 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
