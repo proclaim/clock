@@ -9,7 +9,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_URL="https://github.com/your-org/clock.git"  # UPDATE WITH ACTUAL REPO URL
+REPO_URL="https://github.com/proclaim/clock.git"
 DEPLOYMENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPOS_DIR="$DEPLOYMENT_DIR/repos"
 CLOCK_REPO_DIR="$REPOS_DIR/clock"
