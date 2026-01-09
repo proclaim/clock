@@ -31,7 +31,12 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(go mod edit:*)",
+      "Bash(sudo tee:*)",
+      "Bash(sql-migrate status:*)"
     ]
   }
 }

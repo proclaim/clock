@@ -101,7 +101,6 @@ Requires `Authorization: Bearer <token>` header
 After running migrations, the following test users are available:
 
 - **Admin**: username: `admin`, password: `admin123`
-- **Staff**: username: `john.doe`, password: `staff123`
 - **Staff**: username: `jane.smith`, password: `staff123`
 
 ## Environment Variables
@@ -125,6 +124,9 @@ JWT_REFRESH_EXPIRATION=2592000
 PORT=8080
 ENV=development
 LOG_LEVEL=debug
+
+# CORS (Frontend URL)
+FRONTEND_URL=http://localhost:3000
 ```
 
 ## Business Logic

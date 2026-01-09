@@ -31,9 +31,10 @@ type JWTConfig struct {
 }
 
 type ServerConfig struct {
-	Port     string
-	ENV      string
-	LogLevel string
+	Port        string
+	ENV         string
+	LogLevel    string
+	FrontendURL string
 }
 
 func Load() (*Config, error) {
@@ -56,9 +57,10 @@ func Load() (*Config, error) {
 			RefreshExpiration: getEnvAsInt("JWT_REFRESH_EXPIRATION", 2592000), // 30 days
 		},
 		Server: ServerConfig{
-			Port:     getEnv("PORT", "8080"),
-			ENV:      getEnv("ENV", "development"),
-			LogLevel: getEnv("LOG_LEVEL", "debug"),
+			Port:        getEnv("PORT", "8080"),
+			ENV:         getEnv("ENV", "development"),
+			LogLevel:    getEnv("LOG_LEVEL", "debug"),
+			FrontendURL: getEnv("FRONTEND_URL", "http://localhost:3000"),
 		},
 	}
 

@@ -12,7 +12,7 @@ import (
 // Setup configures all routes and middleware
 func Setup(app *iris.Application, handler *handlers.Handler, cfg *config.Config, logger *zap.Logger) {
 	// Setup CORS first (must be before other middleware)
-	middleware.SetupCORS(app)
+	middleware.SetupCORS(app, cfg)
 
 	// Global middleware
 	app.Use(middleware.SecurityHeadersMiddleware())

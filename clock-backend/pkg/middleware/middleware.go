@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -67,13 +68,18 @@ func JWTAuthMiddleware(cfg *config.Config, logger *zap.Logger) iris.Handler {
 }
 
 // SetupCORS configures CORS middleware using iris-contrib/cors
-func SetupCORS(app *iris.Application) {
+func SetupCORS(app *iris.Application, cfg *config.Config) {
 	// Allow specific origins (frontend URLs)
 	allowedOrigins := []string{
 		"http://localhost:3000",
 		"http://127.0.0.1:3000",
 		"http://localhost:8002",
 		"http://192.168.0.77:8002",
+	}
+
+	// Add configured frontend URL if different from defaults
+	if cfg.Server.FrontendURL != "" && !slices.Contains(allowedOrigins, cfg.Server.FrontendURL) {
+		allowedOrigins = append(allowedOrigins, cfg.Server.FrontendURL)
 	}
 
 	crs := cors.New(cors.Options{

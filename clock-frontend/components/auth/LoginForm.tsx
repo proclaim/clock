@@ -177,9 +177,6 @@ export const LoginForm: React.FC = () => {
               • admin / admin123
             </Typography>
             <Typography variant="body2" display="block" sx={{ color: 'text.secondary' }}>
-              • john.doe / staff123
-            </Typography>
-            <Typography variant="body2" display="block" sx={{ color: 'text.secondary' }}>
               • jane.smith / staff123
             </Typography>
           </Box>
