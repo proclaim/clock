@@ -75,11 +75,19 @@ func SetupCORS(app *iris.Application, cfg *config.Config) {
 		"http://127.0.0.1:3000",
 		"http://localhost:8002",
 		"http://192.168.0.77:8002",
+		"http://192.168.0.77",
+		"http://time.tcode.tw",
+		"https://time.tcode.tw",
 	}
 
 	// Add configured frontend URL if different from defaults
 	if cfg.Server.FrontendURL != "" && !slices.Contains(allowedOrigins, cfg.Server.FrontendURL) {
 		allowedOrigins = append(allowedOrigins, cfg.Server.FrontendURL)
+		// Also add HTTPS version
+		httpsURL := "https" + cfg.Server.FrontendURL[4:]
+		if !slices.Contains(allowedOrigins, httpsURL) {
+			allowedOrigins = append(allowedOrigins, httpsURL)
+		}
 	}
 
 	crs := cors.New(cors.Options{

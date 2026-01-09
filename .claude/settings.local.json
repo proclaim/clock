@@ -36,7 +36,8 @@
       "Bash(scp:*)",
       "Bash(go mod edit:*)",
       "Bash(sudo tee:*)",
-      "Bash(sql-migrate status:*)"
+      "Bash(sql-migrate status:*)",
+      "Bash(python3:*)"
     ]
   }
 }
