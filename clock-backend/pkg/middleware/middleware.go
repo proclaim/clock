@@ -76,6 +76,7 @@ func SetupCORS(app *iris.Application, cfg *config.Config) {
 		"http://localhost:8002",
 		"http://192.168.0.77:8002",
 		"http://192.168.0.77",
+		"https://192.168.0.77",
 		"http://time.tcode.tw",
 		"https://time.tcode.tw",
 	}

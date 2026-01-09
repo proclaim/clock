@@ -62,7 +62,7 @@ services:
     depends_on:
       - clock_backend_prod
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://time.tcode.tw/api/v1}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://time.tcode.tw/api/v1}
       NODE_ENV: production
     networks:
       - clock_web_prod
