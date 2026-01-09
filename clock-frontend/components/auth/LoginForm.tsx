@@ -168,18 +168,6 @@ export const LoginForm: React.FC = () => {
               </Button>
             </Box>
           </form>
-
-          <Box sx={{ mt: 4, p: 2.5, bgcolor: 'grey.50', borderRadius: 2, border: '1px solid', borderColor: 'grey.200' }}>
-            <Typography variant="body2" display="block" gutterBottom sx={{ fontWeight: 600, color: 'text.primary' }}>
-              {t('Demo Accounts:')}
-            </Typography>
-            <Typography variant="body2" display="block" sx={{ color: 'text.secondary', mt: 1 }}>
-              • admin / admin123
-            </Typography>
-            <Typography variant="body2" display="block" sx={{ color: 'text.secondary' }}>
-              • jane.smith / staff123
-            </Typography>
-          </Box>
         </Box>
       </Paper>
     </Box>
