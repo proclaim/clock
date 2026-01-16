@@ -53,7 +53,9 @@ export default function SettingsPage() {
       </Paper>
 
       {/* Change Password */}
-      <ChangePasswordForm />
+      <Box id="change-password">
+        <ChangePasswordForm />
+      </Box>
     </Container>
   );
 }

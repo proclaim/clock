@@ -8,7 +8,46 @@ Clock is a full-stack web application that provides:
 - Employee login with JWT authentication
 - Check-in/check-out functionality
 - Monthly attendance record viewing
-- Admin capabilities (Phase 2)
+- **Admin dashboard with comprehensive management capabilities**
+- Full audit trail for all administrative changes
+
+## Admin Features
+
+Clock includes powerful administrative capabilities for managing employee attendance:
+
+### Admin Dashboard
+- **Automatic redirect**: Admins are automatically taken to the admin dashboard after login
+- **Employee time summary**: View aggregated hours for all employees
+- **Detailed records management**: View, edit, add, and delete attendance records
+- **Advanced filtering**: Filter by date range and specific employees
+- **Pagination**: Handle large datasets with efficient pagination
+
+### Admin Capabilities
+- ✅ **View all employee attendance records** with full details
+- ✅ **Edit existing records** (check-in/out times, status, notes)
+- ✅ **Add missing records** for employees who forgot to check-in/out
+- ✅ **Delete records** with soft-delete for data integrity
+- ✅ **View audit trail** showing who edited what and when
+- ✅ **Export and filter data** by date range and employee
+
+### Admin Exemption
+- Admin users are **exempt from time tracking**
+- No check-in/out functionality available for admin role
+- Clear messaging when admins navigate to attendance page
+
+### Audit Trail
+Every admin action is tracked with:
+- **Edited By**: ID of the admin who made the change
+- **Edited At**: Timestamp of the modification
+- **Edit Reason**: Required explanation for all changes (minimum 3 characters)
+
+### Security
+- Role-based access control (RBAC) with middleware enforcement
+- Admin endpoints require both authentication AND admin role
+- Comprehensive validation on all admin operations
+- Soft deletes preserve data for audit purposes
+
+**For detailed admin documentation**, see [docs/ADMIN_FEATURES.md](./docs/ADMIN_FEATURES.md)
 
 ## Technology Stack
 
@@ -78,9 +117,8 @@ clock/
    - Database: localhost:5433
 
 4. **Default login credentials**
-   - Admin: `admin` / `admin123`
-   - Staff: `john.doe` / `staff123`
-   - Staff: `jane.smith` / `staff123`
+   - **Admin**: `admin` / `admin123` (redirects to `/admin/dashboard`)
+   - Staff: `jane.smith` / `staff123` (redirects to `/attendance`)
 
 ### Database Management
 
@@ -337,8 +375,8 @@ For issues and questions, [add contact information or issue tracker link].
 
 ---
 
-**Status:** Phase 1 (Planning Complete - Ready for Implementation)
+**Status:** Phase 2 Complete (Admin Features Implemented)
 
-**Version:** 0.1.0
+**Version:** 0.2.0
 
-**Last Updated:** 2026-01-05
+**Last Updated:** 2026-01-10

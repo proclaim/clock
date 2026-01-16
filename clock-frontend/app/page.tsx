@@ -6,18 +6,22 @@ import { useAuth } from '@/context/AuthContext';
 import { Box, CircularProgress } from '@mui/material';
 
 export default function Home() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        router.push('/attendance');
+        if (isAdmin) {
+          router.push('/dashboard');
+        } else {
+          router.push('/attendance');
+        }
       } else {
         router.push('/login');
       }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isAdmin, isLoading, router]);
 
   return (
     <Box

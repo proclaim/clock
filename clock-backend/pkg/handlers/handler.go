@@ -12,26 +12,29 @@ import (
 
 // Handler holds all dependencies for HTTP handlers
 type Handler struct {
-	authService       *services.AuthService
-	attendanceService *services.AttendanceService
-	cfg               *config.Config
-	logger            *zap.Logger
-	validate          *validator.Validate
+	authService            *services.AuthService
+	attendanceService      *services.AttendanceService
+	adminAttendanceService *services.AdminAttendanceService
+	cfg                    *config.Config
+	logger                 *zap.Logger
+	validate               *validator.Validate
 }
 
 // NewHandler creates a new handler instance
 func NewHandler(
 	authService *services.AuthService,
 	attendanceService *services.AttendanceService,
+	adminAttendanceService *services.AdminAttendanceService,
 	cfg *config.Config,
 	logger *zap.Logger,
 ) *Handler {
 	return &Handler{
-		authService:       authService,
-		attendanceService: attendanceService,
-		cfg:               cfg,
-		logger:            logger,
-		validate:          validator.New(),
+		authService:            authService,
+		attendanceService:      attendanceService,
+		adminAttendanceService: adminAttendanceService,
+		cfg:                    cfg,
+		logger:                 logger,
+		validate:               validator.New(),
 	}
 }
 

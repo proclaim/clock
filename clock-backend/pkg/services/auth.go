@@ -180,3 +180,118 @@ func (s *AuthService) ChangePassword(employeeID int, currentPassword, newPasswor
 
 	return nil
 }
+
+// ResetPassword resets an employee's password (admin function, no current password required)
+func (s *AuthService) ResetPassword(employeeID int, newPassword string) error {
+	// Validate new password
+	if len(newPassword) < 6 {
+		return customErrors.ErrPasswordTooShort
+	}
+
+	// Get employee to ensure they exist
+	_, err := s.GetEmployeeByID(employeeID)
+	if err != nil {
+		return err
+	}
+
+	// Hash new password
+	newHash, err := utils.HashPassword(newPassword)
+	if err != nil {
+		s.logger.Error("Failed to hash new password", zap.Error(err))
+		return err
+	}
+
+	// Update password in database
+	query := `
+		UPDATE employees
+		SET password_hash = $1, updated_at = NOW()
+		WHERE id = $2 AND deleted_at IS NULL
+	`
+
+	_, err = s.db.Exec(query, newHash, employeeID)
+	if err != nil {
+		s.logger.Error("Database error resetting password", zap.Error(err), zap.Int("employee_id", employeeID))
+		return err
+	}
+
+	s.logger.Info("Password reset successfully by admin", zap.Int("target_employee_id", employeeID))
+
+	return nil
+}
+
+// CreateEmployee creates a new employee
+func (s *AuthService) CreateEmployee(username, name, password string, role models.EmployeeRole) (*models.Employee, error) {
+	// Validate password
+	if len(password) < 6 {
+		return nil, customErrors.ErrPasswordTooShort
+	}
+
+	// Hash password
+	hash, err := utils.HashPassword(password)
+	if err != nil {
+		s.logger.Error("Failed to hash password", zap.Error(err))
+		return nil, err
+	}
+
+	// Check if username already exists
+	var count int
+	checkQuery := `SELECT count(*) FROM employees WHERE username = $1 AND deleted_at IS NULL`
+	err = s.db.Get(&count, checkQuery, username)
+	if err != nil {
+		s.logger.Error("Database error checking username", zap.Error(err))
+		return nil, err
+	}
+	if count > 0 {
+		return nil, customErrors.ErrUsernameTaken
+	}
+
+	// Create employee
+	query := `
+		INSERT INTO employees (username, name, password_hash, role, is_active)
+		VALUES ($1, $2, $3, $4, true)
+		RETURNING id, username, name, email, phone, role, is_active, created_at, updated_at
+	`
+
+	var employee models.Employee
+	// Using QueryRow as sqlx Get/Select usually works for SELECT statements, but RETURNING works too with Get/StructScan depending on driver.
+	// However, basic QueryRow and Scan is safest here without testing sqlx specifics on INSERT RETURNING.
+	// Actually, sqlx Get usually works for INSERT RETURNING in Postgres. But let's stick to standard database/sql Scan for safety or sqlx.Get if confident.
+	// db.QueryRowx is part of sqlx.
+	err = s.db.QueryRowx(query, username, name, hash, role).StructScan(&employee)
+
+	if err != nil {
+		s.logger.Error("Database error creating employee", zap.Error(err))
+		return nil, err
+	}
+
+	s.logger.Info("Employee created successfully", zap.String("username", username))
+
+	return &employee, nil
+}
+
+// UpdateEmployeeStatus updates an employee's active status
+func (s *AuthService) UpdateEmployeeStatus(id int, isActive bool) error {
+	query := `
+		UPDATE employees
+		SET is_active = $1, updated_at = NOW()
+		WHERE id = $2 AND deleted_at IS NULL
+	`
+
+	result, err := s.db.Exec(query, isActive, id)
+	if err != nil {
+		s.logger.Error("Database error updating employee status", zap.Error(err), zap.Int("employee_id", id))
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return customErrors.ErrEmployeeNotFound
+	}
+
+	s.logger.Info("Employee status updated", zap.Int("employee_id", id), zap.Bool("is_active", isActive))
+
+	return nil
+}

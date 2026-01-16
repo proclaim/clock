@@ -1,4 +1,4 @@
-export type EmployeeRole = 'STAFF' | 'ADMIN';
+export type EmployeeRole = 'STAFF' | 'ADMIN' | 'staff' | 'admin';
 
 export interface Employee {
   id: number;
@@ -33,5 +33,6 @@ export interface AuthContextType {
   logout: () => void;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   isLoading: boolean;
 }

@@ -7,14 +7,18 @@ import { LoginForm } from '@/components/auth/LoginForm';
 import { Box, CircularProgress } from '@mui/material';
 
 export default function LoginPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/attendance');
+      if (isAdmin) {
+        router.push('/dashboard');
+      } else {
+        router.push('/attendance');
+      }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isAdmin, isLoading, router]);
 
   if (isLoading) {
     return (

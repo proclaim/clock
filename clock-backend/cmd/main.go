@@ -48,9 +48,10 @@ func main() {
 	// Initialize services
 	authService := services.NewAuthService(db, cfg, logger)
 	attendanceService := services.NewAttendanceService(db, cfg, logger)
+	adminAttendanceService := services.NewAdminAttendanceService(db, cfg, logger)
 
 	// Initialize handlers
-	handler := handlers.NewHandler(authService, attendanceService, cfg, logger)
+	handler := handlers.NewHandler(authService, attendanceService, adminAttendanceService, cfg, logger)
 
 	// Create Iris app
 	app := iris.New()

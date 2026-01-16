@@ -163,3 +163,28 @@ func GetUsername(ctx iris.Context) string {
 	}
 	return ""
 }
+
+// GetRole retrieves the role from the context
+func GetRole(ctx iris.Context) string {
+	if role, ok := ctx.Values().Get(RoleKey).(string); ok {
+		return role
+	}
+	return ""
+}
+
+// RequireAdminMiddleware ensures the user has ADMIN role
+func RequireAdminMiddleware() iris.Handler {
+	return func(ctx iris.Context) {
+		role := GetRole(ctx)
+
+		if role != "ADMIN" {
+			ctx.StatusCode(iris.StatusForbidden)
+			ctx.JSON(reqres.ErrorResponse{
+				Error: "Admin access required",
+			})
+			return
+		}
+
+		ctx.Next()
+	}
+}

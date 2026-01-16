@@ -58,8 +58,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setToken(response.token);
       setUser(response.employee);
 
-      // Redirect to attendance page
-      router.push('/attendance');
+      // Redirect based on role
+      const role = response.employee.role;
+      if (role === 'ADMIN' || role === 'admin') {
+        router.push('/dashboard');
+      } else {
+        router.push('/attendance');
+      }
     } catch (error) {
       throw error;
     }
@@ -99,6 +104,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     changePassword,
     isAuthenticated: !!user && !!token,
+    isAdmin: user?.role === 'ADMIN' || user?.role === 'admin',
     isLoading,
   };
 

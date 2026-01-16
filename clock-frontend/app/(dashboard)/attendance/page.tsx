@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Container, Typography, Paper, Box, CircularProgress } from '@mui/material';
+import { Container, Typography, Paper, Box, CircularProgress, Button } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import { AttendanceStatus } from '@/components/attendance/AttendanceStatus';
 import { CheckInButton } from '@/components/attendance/CheckInButton';
 import { CheckOutButton } from '@/components/attendance/CheckOutButton';
@@ -14,6 +16,8 @@ import { getCurrentMonth, calculateTotalDuration } from '@/utils/dateUtils';
 
 export default function AttendancePage() {
   const { t, i18n } = useTranslation();
+  const { isAdmin } = useAuth();
+  const router = useRouter();
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<AttendanceRecord | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -79,6 +83,42 @@ export default function AttendancePage() {
         <Box display="flex" justifyContent="center">
           <CircularProgress />
         </Box>
+      </Container>
+    );
+  }
+
+  // Hide check-in/out UI for admins
+  if (isAdmin) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700, mb: 3 }}>
+          {t('Attendance Tracking')}
+        </Typography>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            textAlign: 'center',
+            borderRadius: 2,
+            boxShadow: 'rgb(145 158 171 / 30%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px',
+          }}
+        >
+          <Typography variant="h5" color="text.secondary" gutterBottom>
+            {t('Admin users are exempt from time tracking.')}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+            {t('Visit the Admin Dashboard to manage employee attendance records.')}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => router.push('/dashboard')}
+            sx={{ mt: 3 }}
+          >
+            {t('Go to Admin Dashboard')}
+          </Button>
+        </Paper>
       </Container>
     );
   }

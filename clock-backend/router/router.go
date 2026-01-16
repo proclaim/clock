@@ -46,6 +46,26 @@ func Setup(app *iris.Application, handler *handlers.Handler, cfg *config.Config,
 				attendance.Get("/records", handler.GetRecords)
 			}
 
+			// Admin routes (require ADMIN role)
+			admin := protected.Party("/admin", middleware.RequireAdminMiddleware())
+			{
+				// Employee management
+				admin.Get("/employees", handler.GetAllEmployees)
+				admin.Post("/employees", handler.CreateEmployee)
+				admin.Put("/employees/:id/status", handler.UpdateEmployeeStatus)
+				admin.Put("/employees/:id/password", handler.ResetEmployeePassword)
+
+				// Attendance management
+				adminAttendance := admin.Party("/attendance")
+				{
+					adminAttendance.Get("/summary", handler.GetAdminAttendanceSummary)
+					adminAttendance.Get("/records", handler.GetAdminAttendanceRecords)
+					adminAttendance.Post("/records", handler.CreateAdminAttendanceRecord)
+					adminAttendance.Put("/records/:id", handler.UpdateAdminAttendanceRecord)
+					adminAttendance.Delete("/records/:id", handler.DeleteAdminAttendanceRecord)
+				}
+			}
+
 			// Auth routes that require authentication
 			authProtected := protected.Party("/auth")
 			{

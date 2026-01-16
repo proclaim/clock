@@ -13,12 +13,14 @@ var (
 	ErrAlreadyCheckedIn    = errors.New("you already have an active check-in today. Please check out first")
 	ErrNoActiveCheckIn     = errors.New("no active check-in found")
 	ErrAlreadyCheckedOut   = errors.New("already checked out")
+	ErrInvalidDateRange    = errors.New("invalid date range")
 
 	// Employee errors
 	ErrEmployeeNotFound    = errors.New("employee not found")
 	ErrEmployeeNotActive   = errors.New("employee account is not active")
 	ErrInvalidPassword     = errors.New("current password is incorrect")
 	ErrPasswordTooShort    = errors.New("new password must be at least 6 characters")
+	ErrUsernameTaken       = errors.New("username is already taken")
 
 	// Database errors
 	ErrDatabaseConnection  = errors.New("database connection failed")

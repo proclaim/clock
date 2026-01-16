@@ -20,11 +20,12 @@ import {
   Settings,
   Logout,
   Language,
+  Lock,
 } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 
 export const Header: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -38,9 +39,22 @@ export const Header: React.FC = () => {
     setAnchorEl(null);
   };
 
+  const handleLogoClick = () => {
+    if (isAdmin) {
+      router.push('/dashboard');
+    } else {
+      router.push('/attendance');
+    }
+  };
+
   const handleSettings = () => {
     handleClose();
     router.push('/settings');
+  };
+
+  const handleChangePassword = () => {
+    handleClose();
+    router.push('/settings#change-password');
   };
 
   const handleAttendance = () => {
@@ -78,14 +92,27 @@ export const Header: React.FC = () => {
       }}
     >
       <Toolbar sx={{ height: 70 }}>
-        <AccessTime sx={{ mr: 2, color: 'primary.main' }} />
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{ flexGrow: 1, fontWeight: 700, color: 'text.primary' }}
+        <Box
+          onClick={handleLogoClick}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+            flexGrow: 1,
+            '&:hover': {
+              opacity: 0.8,
+            },
+          }}
         >
-          {t('Clock')}
-        </Typography>
+          <AccessTime sx={{ mr: 2, color: 'primary.main' }} />
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ fontWeight: 700, color: 'text.primary' }}
+          >
+            {t('Clock')}
+          </Typography>
+        </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton
@@ -157,6 +184,12 @@ export const Header: React.FC = () => {
                 <Settings fontSize="small" />
               </ListItemIcon>
               {t('Settings')}
+            </MenuItem>
+            <MenuItem onClick={handleChangePassword}>
+              <ListItemIcon>
+                <Lock fontSize="small" />
+              </ListItemIcon>
+              {t('Change Password')}
             </MenuItem>
             <MenuItem onClick={handleLogout}>
               <ListItemIcon>

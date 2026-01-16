@@ -26,6 +26,9 @@ type AttendanceRecord struct {
 	CreatedAt     time.Time        `db:"created_at" json:"created_at"`
 	UpdatedAt     time.Time        `db:"updated_at" json:"updated_at"`
 	DeletedAt     sql.NullTime     `db:"deleted_at" json:"-"`
+	EditedBy      sql.NullInt64    `db:"edited_by" json:"edited_by,omitempty"`
+	EditedAt      sql.NullTime     `db:"edited_at" json:"edited_at,omitempty"`
+	EditReason    sql.NullString   `db:"edit_reason" json:"edit_reason,omitempty"`
 }
 
 // AttendanceRecordResponse represents attendance record data for API responses
@@ -61,4 +64,58 @@ func (a *AttendanceRecord) ToResponse() *AttendanceRecordResponse {
 	}
 
 	return resp
+}
+
+// AttendanceRecordWithEmployee includes employee information
+type AttendanceRecordWithEmployee struct {
+	ID               int              `db:"id" json:"id"`
+	EmployeeID       int              `db:"employee_id" json:"employee_id"`
+	CheckInTime      time.Time        `db:"check_in_time" json:"check_in_time"`
+	CheckOutTime     sql.NullTime     `db:"check_out_time" json:"check_out_time"`
+	Status           AttendanceStatus `db:"status" json:"status"`
+	CheckInNote      sql.NullString   `db:"check_in_note" json:"check_in_note"`
+	CheckOutNote     sql.NullString   `db:"check_out_note" json:"check_out_note"`
+	CreatedAt        time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt        time.Time        `db:"updated_at" json:"updated_at"`
+	EditedBy         sql.NullInt64    `db:"edited_by" json:"edited_by"`
+	EditedAt         sql.NullTime     `db:"edited_at" json:"edited_at"`
+	EditReason       sql.NullString   `db:"edit_reason" json:"edit_reason"`
+	EmployeeName     string           `db:"employee_name" json:"employee_name"`
+	EmployeeUsername string           `db:"employee_username" json:"employee_username"`
+}
+
+// EmployeeAttendanceSummary represents aggregated attendance data per employee
+type EmployeeAttendanceSummary struct {
+	EmployeeID   int     `db:"employee_id" json:"employee_id"`
+	EmployeeName string  `db:"employee_name" json:"employee_name"`
+	Username     string  `db:"username" json:"username"`
+	TotalRecords int     `db:"total_records" json:"total_records"`
+	TotalMinutes float64 `db:"total_minutes" json:"total_minutes"`
+}
+
+// EmployeeAttendanceSummaryResponse for API
+type EmployeeAttendanceSummaryResponse struct {
+	EmployeeID      int     `json:"employee_id"`
+	EmployeeName    string  `json:"employee_name"`
+	Username        string  `json:"username"`
+	TotalRecords    int     `json:"total_records"`
+	TotalHours      int     `json:"total_hours"`
+	TotalMinutes    int     `json:"total_minutes"`
+	TotalMinutesRaw float64 `json:"total_minutes_raw"`
+}
+
+// ToResponse converts to response with calculated hours
+func (s *EmployeeAttendanceSummary) ToResponse() *EmployeeAttendanceSummaryResponse {
+	hours := int(s.TotalMinutes / 60)
+	minutes := int(s.TotalMinutes) % 60
+
+	return &EmployeeAttendanceSummaryResponse{
+		EmployeeID:      s.EmployeeID,
+		EmployeeName:    s.EmployeeName,
+		Username:        s.Username,
+		TotalRecords:    s.TotalRecords,
+		TotalHours:      hours,
+		TotalMinutes:    minutes,
+		TotalMinutesRaw: s.TotalMinutes,
+	}
 }

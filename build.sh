@@ -79,6 +79,7 @@ docker build \
     -t clock_frontend_prod:latest \
     --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
     --build-arg VCS_REF=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown") \
+    --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://time.tcode.tw/api/v1}" \
     clock-frontend/
 
 cd "$DEPLOYMENT_DIR"
