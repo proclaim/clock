@@ -61,7 +61,7 @@ func JWTAuthMiddleware(cfg *config.Config, logger *zap.Logger) iris.Handler {
 		// Inject claims into context
 		ctx.Values().Set(EmployeeIDKey, claims.EmployeeID)
 		ctx.Values().Set(UsernameKey, claims.Username)
-		ctx.Values().Set(RoleKey, claims.Role)
+		ctx.Values().Set(RoleKey, string(claims.Role))
 
 		ctx.Next()
 	}
