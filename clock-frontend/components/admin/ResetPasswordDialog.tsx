@@ -42,11 +42,6 @@ export const ResetPasswordDialog: React.FC<ResetPasswordDialogProps> = ({
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError(t('Password must be at least 6 characters'));
-      return;
-    }
-
     if (newPassword !== confirmPassword) {
       setError(t('Passwords must match'));
       return;

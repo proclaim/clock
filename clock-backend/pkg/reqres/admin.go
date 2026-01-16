@@ -45,14 +45,14 @@ type EmployeeListResponse struct {
 
 // ResetPasswordRequest represents the request body for resetting an employee's password
 type ResetPasswordRequest struct {
-	NewPassword string `json:"new_password" validate:"required,min=6"`
+	NewPassword string `json:"new_password" validate:"required"`
 }
 
 // CreateEmployeeRequest represents the request body for creating a new employee
 type CreateEmployeeRequest struct {
-	Username string `json:"username" validate:"required,min=3"`
+	Username string `json:"username" validate:"required"`
 	Name     string `json:"name" validate:"required"`
-	Password string `json:"password" validate:"required,min=6"`
+	Password string `json:"password" validate:"required"`
 	Role     string `json:"role" validate:"required,oneof=STAFF ADMIN"`
 }
 

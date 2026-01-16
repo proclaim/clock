@@ -139,11 +139,6 @@ func (s *AuthService) GetEmployeeByID(id int) (*models.Employee, error) {
 
 // ChangePassword changes an employee's password
 func (s *AuthService) ChangePassword(employeeID int, currentPassword, newPassword string) error {
-	// Validate new password
-	if len(newPassword) < 6 {
-		return customErrors.ErrPasswordTooShort
-	}
-
 	// Get employee
 	employee, err := s.GetEmployeeByID(employeeID)
 	if err != nil {
@@ -183,11 +178,6 @@ func (s *AuthService) ChangePassword(employeeID int, currentPassword, newPasswor
 
 // ResetPassword resets an employee's password (admin function, no current password required)
 func (s *AuthService) ResetPassword(employeeID int, newPassword string) error {
-	// Validate new password
-	if len(newPassword) < 6 {
-		return customErrors.ErrPasswordTooShort
-	}
-
 	// Get employee to ensure they exist
 	_, err := s.GetEmployeeByID(employeeID)
 	if err != nil {
@@ -221,11 +211,6 @@ func (s *AuthService) ResetPassword(employeeID int, newPassword string) error {
 
 // CreateEmployee creates a new employee
 func (s *AuthService) CreateEmployee(username, name, password string, role models.EmployeeRole) (*models.Employee, error) {
-	// Validate password
-	if len(password) < 6 {
-		return nil, customErrors.ErrPasswordTooShort
-	}
-
 	// Hash password
 	hash, err := utils.HashPassword(password)
 	if err != nil {

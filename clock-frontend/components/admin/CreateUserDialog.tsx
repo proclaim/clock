@@ -38,10 +38,6 @@ export const CreateUserDialog: React.FC<CreateUserDialogProps> = ({
       setError(t('All fields are required'));
       return;
     }
-    if (password.length < 6) {
-      setError(t('Password must be at least 6 characters'));
-      return;
-    }
 
     setIsSubmitting(true);
     setError('');

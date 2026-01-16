@@ -50,7 +50,9 @@
       "Bash(nslookup:*)",
       "Bash(docker ps:*)",
       "Bash(npx:*)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(git -C /Users/jim/clock log --oneline)",
+      "Bash(git -C /Users/jim/clock show 9fb0104 --stat)"
     ]
   }
 }
