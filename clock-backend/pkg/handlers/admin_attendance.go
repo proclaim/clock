@@ -109,6 +109,11 @@ func (h *Handler) GetAdminAttendanceRecords(ctx iris.Context) {
 		return
 	}
 
+	// Ensure records is never null in JSON response
+	if records == nil {
+		records = []*models.AttendanceRecordWithEmployee{}
+	}
+
 	response := reqres.AdminAttendanceRecordsResponse{
 		Records: records,
 		Total:   total,
