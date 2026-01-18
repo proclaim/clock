@@ -64,3 +64,99 @@ If `/etc/nginx/nginx.conf` gets corrupted, restore it from a fresh image:
 /usr/local/bin/docker cp /tmp/nginx.main.conf clock_nginx_prod:/etc/nginx/nginx.conf
 /usr/local/bin/docker start clock_nginx_prod
 ```
+
+## Deployment Process
+
+### Standard Deployment
+
+```bash
+# 1. Pull latest code on production server
+ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && git pull'
+
+# 2. Build backend image
+ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && /usr/local/bin/docker build -f clock-backend/Dockerfile -t clock_backend_prod clock-backend/'
+
+# 3. Build frontend image (IMPORTANT: must include NEXT_PUBLIC_API_URL)
+ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && /usr/local/bin/docker build -f clock-frontend/Dockerfile -t clock_frontend_prod --build-arg NEXT_PUBLIC_API_URL=https://192.168.0.77/api/v1 clock-frontend/'
+
+# 4. Restart containers
+ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment && /usr/local/bin/docker compose -f docker-compose.prod.yml up -d clock_backend_prod clock_frontend_prod'
+```
+
+### Important: Frontend Build-Time Variables
+
+Next.js `NEXT_PUBLIC_*` environment variables are **baked into the JavaScript bundle at build time**. They cannot be changed at runtime.
+
+If the frontend shows `ERR_CONNECTION_REFUSED` to `localhost:8080`, it means `NEXT_PUBLIC_API_URL` was not set during the Docker build.
+
+**Fix:**
+```bash
+# Rebuild with the correct API URL
+ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && /usr/local/bin/docker build -f clock-frontend/Dockerfile -t clock_frontend_prod --build-arg NEXT_PUBLIC_API_URL=https://192.168.0.77/api/v1 clock-frontend/'
+
+# Restart frontend
+ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment && /usr/local/bin/docker compose -f docker-compose.prod.yml up -d clock_frontend_prod'
+```
+
+After fixing, users may need to hard refresh (Ctrl+Shift+R) to clear cached JS files.
+
+## Troubleshooting
+
+### Login Returns 401 Unauthorized
+
+Check backend logs for details:
+```bash
+ssh lachesis@192.168.0.77 '/usr/local/bin/docker logs clock_backend_prod --tail 50 2>&1 | grep -i login'
+```
+
+- "Login failed: user not found" - username doesn't exist
+- "Login failed: invalid password" - wrong password
+
+To reset a user's password:
+```bash
+# Generate a bcrypt hash locally
+cd clock-backend && echo 'package main
+import ("fmt"; "golang.org/x/crypto/bcrypt")
+func main() { h, _ := bcrypt.GenerateFromPassword([]byte("newpassword"), 10); fmt.Println(string(h)) }' > /tmp/genhash.go && go run /tmp/genhash.go
+
+# Update in database (use single quotes, escape $ with E prefix)
+ssh lachesis@192.168.0.77 "/usr/local/bin/docker exec clock_postgres_prod psql -U clock_user -d clock -c \"UPDATE employees SET password_hash = E'\$2a\$10\$YOUR_HASH_HERE' WHERE username = 'USERNAME';\""
+```
+
+### Frontend Shows Connection Refused / Network Error
+
+1. Check if containers are running:
+   ```bash
+   ssh lachesis@192.168.0.77 '/usr/local/bin/docker ps --filter "name=clock"'
+   ```
+
+2. Check if API URL is correct (should NOT be localhost:8080):
+   ```bash
+   ssh lachesis@192.168.0.77 'curl -sk https://192.168.0.77/ | grep -o "localhost:8080" || echo "OK - no localhost:8080 found"'
+   ```
+
+3. If localhost:8080 is found, rebuild frontend with correct `NEXT_PUBLIC_API_URL` (see above).
+
+### Containers Show "unhealthy" Status
+
+This is often just slow health checks. Verify actual functionality:
+```bash
+# Test backend health
+ssh lachesis@192.168.0.77 '/usr/local/bin/docker exec clock_backend_prod wget -qO- http://localhost:8080/health'
+
+# Test frontend
+ssh lachesis@192.168.0.77 '/usr/local/bin/docker exec clock_nginx_prod wget -qO- http://clock_frontend_prod:3000/ | head -5'
+
+# Test nginx
+ssh lachesis@192.168.0.77 'curl -sk https://192.168.0.77/ | head -5'
+```
+
+### Database Queries
+
+```bash
+# List all users
+ssh lachesis@192.168.0.77 '/usr/local/bin/docker exec clock_postgres_prod psql -U clock_user -d clock -c "SELECT id, username, name, role, is_active FROM employees;"'
+
+# Check attendance records
+ssh lachesis@192.168.0.77 '/usr/local/bin/docker exec clock_postgres_prod psql -U clock_user -d clock -c "SELECT * FROM attendance_records ORDER BY id DESC LIMIT 10;"'
+```
