@@ -46,6 +46,13 @@ func Setup(app *iris.Application, handler *handlers.Handler, cfg *config.Config,
 				attendance.Get("/records", handler.GetRecords)
 			}
 
+			// Leave routes (staff can create and view their own leaves)
+			leaves := protected.Party("/leaves")
+			{
+				leaves.Post("", handler.CreateLeave)
+				leaves.Get("", handler.GetLeaves)
+			}
+
 			// Admin routes (require ADMIN role)
 			admin := protected.Party("/admin", middleware.RequireAdminMiddleware())
 			{
@@ -63,6 +70,14 @@ func Setup(app *iris.Application, handler *handlers.Handler, cfg *config.Config,
 					adminAttendance.Post("/records", handler.CreateAdminAttendanceRecord)
 					adminAttendance.Put("/records/:id", handler.UpdateAdminAttendanceRecord)
 					adminAttendance.Delete("/records/:id", handler.DeleteAdminAttendanceRecord)
+				}
+
+				// Leave management
+				adminLeaves := admin.Party("/leaves")
+				{
+					adminLeaves.Get("", handler.GetAdminLeaves)
+					adminLeaves.Put("/:id", handler.UpdateAdminLeave)
+					adminLeaves.Delete("/:id", handler.DeleteAdminLeave)
 				}
 			}
 

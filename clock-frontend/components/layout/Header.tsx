@@ -21,6 +21,7 @@ import {
   Logout,
   Language,
   Lock,
+  EventBusy,
 } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 
@@ -60,6 +61,11 @@ export const Header: React.FC = () => {
   const handleAttendance = () => {
     handleClose();
     router.push('/attendance');
+  };
+
+  const handleLeave = () => {
+    handleClose();
+    router.push('/leave');
   };
 
   const handleLogout = async () => {
@@ -178,6 +184,12 @@ export const Header: React.FC = () => {
                 <AccessTime fontSize="small" />
               </ListItemIcon>
               {t('Attendance')}
+            </MenuItem>
+            <MenuItem onClick={handleLeave}>
+              <ListItemIcon>
+                <EventBusy fontSize="small" />
+              </ListItemIcon>
+              {t('Leave')}
             </MenuItem>
             <MenuItem onClick={handleSettings}>
               <ListItemIcon>

@@ -8,6 +8,13 @@ import {
   AttendanceRecordWithEmployee,
 } from '@/types/admin';
 import { Employee } from '@/types/auth';
+import {
+  Leave,
+  LeaveWithEmployee,
+  UpdateLeaveRequest,
+  LeaveResponse,
+  AdminLeavesResponse,
+} from '@/types/leave';
 
 class AdminService {
   // Get attendance summary for all employees
@@ -170,6 +177,65 @@ class AdminService {
         throw new Error(error.response.data.error);
       }
       throw new Error('Failed to update employee status');
+    }
+  }
+
+  // Get all leave records with pagination
+  async getLeaves(
+    page: number = 1,
+    perPage: number = 50,
+    startDate?: string,
+    endDate?: string,
+    employeeId?: number
+  ): Promise<AdminLeavesResponse> {
+    try {
+      const params: Record<string, string> = {
+        page: page.toString(),
+        per_page: perPage.toString(),
+      };
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+      if (employeeId) params.employee_id = employeeId.toString();
+
+      const response = await api.get<AdminLeavesResponse>('/admin/leaves', {
+        params,
+      });
+
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to get leave records');
+    }
+  }
+
+  // Update a leave record
+  async updateLeave(leaveId: number, data: UpdateLeaveRequest): Promise<Leave> {
+    try {
+      const response = await api.put<LeaveResponse>(
+        `/admin/leaves/${leaveId}`,
+        data
+      );
+
+      return response.data.leave;
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to update leave record');
+    }
+  }
+
+  // Delete a leave record
+  async deleteLeave(leaveId: number): Promise<void> {
+    try {
+      await api.delete(`/admin/leaves/${leaveId}`);
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to delete leave record');
     }
   }
 }

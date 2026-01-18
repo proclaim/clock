@@ -15,6 +15,8 @@ type Handler struct {
 	authService            *services.AuthService
 	attendanceService      *services.AttendanceService
 	adminAttendanceService *services.AdminAttendanceService
+	leaveService           *services.LeaveService
+	adminLeaveService      *services.AdminLeaveService
 	cfg                    *config.Config
 	logger                 *zap.Logger
 	validate               *validator.Validate
@@ -25,6 +27,8 @@ func NewHandler(
 	authService *services.AuthService,
 	attendanceService *services.AttendanceService,
 	adminAttendanceService *services.AdminAttendanceService,
+	leaveService *services.LeaveService,
+	adminLeaveService *services.AdminLeaveService,
 	cfg *config.Config,
 	logger *zap.Logger,
 ) *Handler {
@@ -32,6 +36,8 @@ func NewHandler(
 		authService:            authService,
 		attendanceService:      attendanceService,
 		adminAttendanceService: adminAttendanceService,
+		leaveService:           leaveService,
+		adminLeaveService:      adminLeaveService,
 		cfg:                    cfg,
 		logger:                 logger,
 		validate:               validator.New(),

@@ -22,7 +22,10 @@ var (
 	ErrPasswordTooShort    = errors.New("new password must be at least 6 characters")
 	ErrUsernameTaken       = errors.New("username is already taken")
 
+	// Leave errors
+	ErrLeaveOverlap = errors.New("leave dates overlap with an existing leave record")
+
 	// Database errors
-	ErrDatabaseConnection  = errors.New("database connection failed")
-	ErrRecordNotFound      = errors.New("record not found")
+	ErrDatabaseConnection = errors.New("database connection failed")
+	ErrRecordNotFound     = errors.New("record not found")
 )
