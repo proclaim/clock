@@ -145,7 +145,17 @@ export default function AttendancePage() {
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
           {t('Actions')}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            mt: 2,
+            flexWrap: 'wrap',
+            '& > button': {
+              flex: { xs: '1 1 100%', sm: '0 0 auto' },
+            },
+          }}
+        >
           <CheckInButton disabled={isCheckedIn} onSuccess={handleRefresh} />
           <CheckOutButton disabled={!isCheckedIn} onSuccess={handleRefresh} />
         </Box>

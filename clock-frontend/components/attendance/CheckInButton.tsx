@@ -50,7 +50,7 @@ export const CheckInButton: React.FC<CheckInButtonProps> = ({ disabled, onSucces
         startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <Login />}
         onClick={handleCheckIn}
         disabled={disabled || isLoading}
-        sx={{ minWidth: 150 }}
+        sx={{ minWidth: { xs: 'auto', sm: 150 }, width: { xs: '100%', sm: 'auto' } }}
       >
         {isLoading ? t('Checking In...') : t('Check In')}
       </Button>

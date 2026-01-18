@@ -34,7 +34,7 @@ func (s *AuthService) Login(username, password string) (*models.Employee, string
 		SELECT id, username, name, email, phone, password_hash, role, is_active,
 		       created_at, updated_at, deleted_at
 		FROM employees
-		WHERE username = $1 AND deleted_at IS NULL
+		WHERE LOWER(username) = LOWER($1) AND deleted_at IS NULL
 	`
 
 	err := s.db.Get(&employee, query, username)
@@ -218,9 +218,9 @@ func (s *AuthService) CreateEmployee(username, name, password string, role model
 		return nil, err
 	}
 
-	// Check if username already exists
+	// Check if username already exists (case-insensitive)
 	var count int
-	checkQuery := `SELECT count(*) FROM employees WHERE username = $1 AND deleted_at IS NULL`
+	checkQuery := `SELECT count(*) FROM employees WHERE LOWER(username) = LOWER($1) AND deleted_at IS NULL`
 	err = s.db.Get(&count, checkQuery, username)
 	if err != nil {
 		s.logger.Error("Database error checking username", zap.Error(err))

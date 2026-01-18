@@ -42,7 +42,7 @@ export const CheckOutButton: React.FC<CheckOutButtonProps> = ({ disabled, onSucc
         startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <Logout />}
         onClick={handleCheckOut}
         disabled={disabled || isLoading}
-        sx={{ minWidth: 150 }}
+        sx={{ minWidth: { xs: 'auto', sm: 150 }, width: { xs: '100%', sm: 'auto' } }}
       >
         {isLoading ? t('Checking Out...') : t('Check Out')}
       </Button>
