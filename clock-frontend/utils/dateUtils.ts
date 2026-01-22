@@ -1,4 +1,4 @@
-import { format, parseISO, differenceInMinutes } from 'date-fns';
+import { format, parseISO, differenceInMinutes, isValid } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 import { AttendanceRecord } from '@/types/attendance';
 
@@ -54,6 +54,11 @@ export const calculateDuration = (
   try {
     const checkIn = parseISO(checkInTime);
     const checkOut = parseISO(checkOutTime);
+
+    if (!isValid(checkIn) || !isValid(checkOut)) {
+      return '—';
+    }
+
     const minutes = differenceInMinutes(checkOut, checkIn);
 
     const hours = Math.floor(minutes / 60);
