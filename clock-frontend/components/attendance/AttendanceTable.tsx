@@ -13,8 +13,11 @@ import {
   Chip,
   Typography,
   Box,
+  Stack,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import { CheckCircle, Cancel, Warning } from '@mui/icons-material';
+import { CheckCircle, Warning } from '@mui/icons-material';
 import { AttendanceRecord } from '@/types/attendance';
 import { formatDate, formatTime, calculateDuration } from '@/utils/dateUtils';
 
@@ -24,6 +27,8 @@ interface AttendanceTableProps {
 
 export const AttendanceTable: React.FC<AttendanceTableProps> = ({ records }) => {
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const getStatusChip = (status: string) => {
     switch (status) {
@@ -56,6 +61,45 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ records }) => 
     );
   }
 
+  // Mobile compact list item
+  const MobileListItem = ({ record }: { record: AttendanceRecord }) => (
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        boxShadow: 'rgb(145 158 171 / 30%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px',
+        bgcolor: record.status === 'AUTO_CLOSED' ? 'warning.lighter' : 'background.paper',
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            {formatDate(record.check_in_time, i18n.language)}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {formatTime(record.check_in_time, i18n.language)} → {record.check_out_time ? formatTime(record.check_out_time, i18n.language) : '-'}
+            <Typography component="span" sx={{ mx: 1.5, color: 'text.disabled' }}>|</Typography>
+            {calculateDuration(record.check_in_time, record.check_out_time, i18n.language)}
+          </Typography>
+        </Box>
+        {getStatusChip(record.status)}
+      </Box>
+    </Paper>
+  );
+
+  // Mobile view - compact list
+  if (isMobile) {
+    return (
+      <Stack spacing={1.5}>
+        {records.map((record) => (
+          <MobileListItem key={record.id} record={record} />
+        ))}
+      </Stack>
+    );
+  }
+
+  // Desktop view - table
   return (
     <TableContainer
       component={Paper}
