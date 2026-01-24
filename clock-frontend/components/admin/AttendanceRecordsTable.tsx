@@ -18,6 +18,9 @@ import {
   TablePagination,
   Button,
   Tooltip,
+  Stack,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { Edit, Delete, Add, Info } from '@mui/icons-material';
 import { adminService } from '@/services/adminService';
@@ -45,6 +48,8 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
   onRecordUpdated,
 }) => {
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [isLoading, setIsLoading] = useState(true);
   const [records, setRecords] = useState<AttendanceRecordWithEmployee[]>([]);
@@ -115,6 +120,57 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
     }
   };
 
+  // Mobile list item component
+  const MobileListItem = ({ record }: { record: AttendanceRecordWithEmployee }) => (
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        boxShadow: 'rgb(145 158 171 / 30%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px',
+        bgcolor: record.status === 'AUTO_CLOSED' ? 'warning.lighter' : 'background.paper',
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            {record.employee_name}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {record.employee_username}
+          </Typography>
+        </Box>
+        {getStatusChip(record.status)}
+      </Box>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+        {formatDate(record.check_in_time, i18n.language)}
+        <Typography component="span" sx={{ mx: 1, color: 'text.disabled' }}>•</Typography>
+        {formatTime(record.check_in_time, i18n.language)} → {record.check_out_time ? formatTime(record.check_out_time as any, i18n.language) : '-'}
+        <Typography component="span" sx={{ mx: 1, color: 'text.disabled' }}>•</Typography>
+        {calculateDuration(record.check_in_time, record.check_out_time as any, i18n.language)}
+      </Typography>
+      <Box sx={{ display: 'flex', gap: 0.5 }}>
+        {record.edited_at && (
+          <Tooltip title={t('View Audit Info')}>
+            <IconButton size="small" onClick={() => handleShowAudit(record)}>
+              <Info fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+        <Tooltip title={t('Edit')}>
+          <IconButton size="small" onClick={() => handleEdit(record)}>
+            <Edit fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={t('Delete')}>
+          <IconButton size="small" onClick={() => handleDelete(record)}>
+            <Delete fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    </Paper>
+  );
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" sx={{ py: 4 }}>
@@ -136,122 +192,162 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
         </Button>
       </Box>
 
-      <TableContainer
-        component={Paper}
-        elevation={0}
-        sx={{
-          borderRadius: 2,
-          boxShadow: 'rgb(145 158 171 / 30%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px',
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: 'grey.50' }}>
-              <TableCell sx={{ fontWeight: 600 }}>{t('Employee')}</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>{t('Date')}</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>{t('Check-In Time')}</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>{t('Check-Out Time')}</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>{t('Duration')}</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>{t('Status')}</TableCell>
-              <TableCell sx={{ fontWeight: 600 }} align="right">
-                {t('Actions')}
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {records.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <Typography variant="body1" color="text.secondary" sx={{ py: 4 }}>
-                    {t('No attendance records found.')}
-                  </Typography>
+      {/* Mobile view */}
+      {isMobile ? (
+        <Box>
+          {records.length === 0 ? (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                textAlign: 'center',
+                borderRadius: 2,
+                boxShadow: 'rgb(145 158 171 / 30%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px',
+              }}
+            >
+              <Typography variant="body1" color="text.secondary">
+                {t('No attendance records found.')}
+              </Typography>
+            </Paper>
+          ) : (
+            <Stack spacing={1.5}>
+              {records.map((record) => (
+                <MobileListItem key={record.id} record={record} />
+              ))}
+            </Stack>
+          )}
+          <TablePagination
+            component="div"
+            count={total}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[25, 50, 100]}
+          />
+        </Box>
+      ) : (
+        /* Desktop view */
+        <TableContainer
+          component={Paper}
+          elevation={0}
+          sx={{
+            borderRadius: 2,
+            boxShadow: 'rgb(145 158 171 / 30%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px',
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'grey.50' }}>
+                <TableCell sx={{ fontWeight: 600 }}>{t('Employee')}</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>{t('Date')}</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>{t('Check-In Time')}</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>{t('Check-Out Time')}</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>{t('Duration')}</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>{t('Status')}</TableCell>
+                <TableCell sx={{ fontWeight: 600 }} align="right">
+                  {t('Actions')}
                 </TableCell>
               </TableRow>
-            ) : (
-              records.map((record) => (
-                <TableRow
-                  key={record.id}
-                  sx={{
-                    '&:last-child td, &:last-child th': { border: 0 },
-                    bgcolor: record.status === 'AUTO_CLOSED' ? 'warning.lighter' : 'inherit',
-                    '&:hover': { bgcolor: 'grey.50' },
-                  }}
-                >
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {record.employee_name}
+            </TableHead>
+            <TableBody>
+              {records.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <Typography variant="body1" color="text.secondary" sx={{ py: 4 }}>
+                      {t('No attendance records found.')}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {record.employee_username}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {formatDate(record.check_in_time, i18n.language)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {formatTime(record.check_in_time, i18n.language)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    {record.check_out_time ? (
-                      <Typography variant="body2">
-                        {formatTime(record.check_out_time as any, i18n.language)}
-                      </Typography>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary">
-                        —
-                      </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {calculateDuration(record.check_in_time, record.check_out_time as any, i18n.language)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>{getStatusChip(record.status)}</TableCell>
-                  <TableCell align="right">
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
-                      {record.edited_at && (
-                        <Tooltip title={t('View Audit Info')}>
-                          <IconButton size="small" onClick={() => handleShowAudit(record)}>
-                            <Info fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      <Tooltip title={t('Edit')}>
-                        <IconButton size="small" onClick={() => handleEdit(record)}>
-                          <Edit fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t('Delete')}>
-                        <IconButton size="small" onClick={() => handleDelete(record)}>
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                records.map((record) => (
+                  <TableRow
+                    key={record.id}
+                    sx={{
+                      '&:last-child td, &:last-child th': { border: 0 },
+                      bgcolor: record.status === 'AUTO_CLOSED' ? 'warning.lighter' : 'inherit',
+                      '&:hover': { bgcolor: 'grey.50' },
+                    }}
+                  >
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {record.employee_name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {record.employee_username}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {formatDate(record.check_in_time, i18n.language)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {formatTime(record.check_in_time, i18n.language)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      {record.check_out_time ? (
+                        <Typography variant="body2">
+                          {formatTime(record.check_out_time as any, i18n.language)}
+                        </Typography>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          —
+                        </Typography>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {calculateDuration(record.check_in_time, record.check_out_time as any, i18n.language)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{getStatusChip(record.status)}</TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                        {record.edited_at && (
+                          <Tooltip title={t('View Audit Info')}>
+                            <IconButton size="small" onClick={() => handleShowAudit(record)}>
+                              <Info fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        <Tooltip title={t('Edit')}>
+                          <IconButton size="small" onClick={() => handleEdit(record)}>
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t('Delete')}>
+                          <IconButton size="small" onClick={() => handleDelete(record)}>
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
 
-        <TablePagination
-          component="div"
-          count={total}
-          page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-          rowsPerPageOptions={[25, 50, 100]}
-        />
-      </TableContainer>
+          <TablePagination
+            component="div"
+            count={total}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[25, 50, 100]}
+          />
+        </TableContainer>
+      )}
 
       {/* Dialogs */}
       <EditRecordDialog
