@@ -15,7 +15,7 @@ import {
   Stack,
 } from '@mui/material';
 import { LockReset, Group } from '@mui/icons-material';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { adminService } from '@/services/adminService';
@@ -34,9 +34,9 @@ export default function AdminDashboardPage() {
   const [summaries, setSummaries] = useState<EmployeeAttendanceSummary[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
 
-  // Filters
+  // Filters - default to last 7 days
   const [startDate, setStartDate] = useState<string>(
-    format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd')
+    format(subDays(new Date(), 6), 'yyyy-MM-dd')
   );
   const [endDate, setEndDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | undefined>(undefined);
@@ -70,7 +70,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleClearFilters = () => {
-    setStartDate(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
+    setStartDate(format(subDays(new Date(), 6), 'yyyy-MM-dd'));
     setEndDate(format(new Date(), 'yyyy-MM-dd'));
     setSelectedEmployeeId(undefined);
   };
@@ -177,8 +177,22 @@ export default function AdminDashboardPage() {
         </Grid>
       </Paper>
 
-      {/* Employee Summary Table */}
+      {/* Attendance Records Table */}
       <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 3 }}>
+          {t('Attendance Records')}
+        </Typography>
+        <AttendanceRecordsTable
+          startDate={startDate}
+          endDate={endDate}
+          employeeId={selectedEmployeeId}
+          employees={employees}
+          onRecordUpdated={loadData}
+        />
+      </Box>
+
+      {/* Employee Summary Table */}
+      <Box>
         <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 3 }}>
           {t('Employee Time Summary')}
         </Typography>
@@ -192,20 +206,6 @@ export default function AdminDashboardPage() {
             onEmployeeClick={(empId) => setSelectedEmployeeId(empId)}
           />
         )}
-      </Box>
-
-      {/* Detailed Records Table */}
-      <Box>
-        <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 3 }}>
-          {t('Attendance Records')}
-        </Typography>
-        <AttendanceRecordsTable
-          startDate={startDate}
-          endDate={endDate}
-          employeeId={selectedEmployeeId}
-          employees={employees}
-          onRecordUpdated={loadData}
-        />
       </Box>
 
       <ResetPasswordDialog
