@@ -109,13 +109,14 @@ func (h *Handler) GetAdminAttendanceRecords(ctx iris.Context) {
 		return
 	}
 
-	// Ensure records is never null in JSON response
-	if records == nil {
-		records = []*models.AttendanceRecordWithEmployee{}
+	// Convert records to response format
+	recordResponses := make([]*models.AttendanceRecordWithEmployeeResponse, len(records))
+	for i, record := range records {
+		recordResponses[i] = record.ToResponse()
 	}
 
 	response := reqres.AdminAttendanceRecordsResponse{
-		Records: records,
+		Records: recordResponses,
 		Total:   total,
 		Page:    page,
 		PerPage: perPage,
@@ -138,12 +139,6 @@ func (h *Handler) UpdateAdminAttendanceRecord(ctx iris.Context) {
 	var req reqres.UpdateAttendanceRecordRequest
 	if err := ctx.ReadJSON(&req); err != nil {
 		h.respondWithError(ctx, iris.StatusBadRequest, "Invalid request body")
-		return
-	}
-
-	// Validate request
-	if err := h.validate.Struct(req); err != nil {
-		h.respondWithError(ctx, iris.StatusBadRequest, "Edit reason is required (minimum 3 characters)")
 		return
 	}
 
@@ -177,7 +172,7 @@ func (h *Handler) UpdateAdminAttendanceRecord(ctx iris.Context) {
 	// Update record
 	record, err := h.adminAttendanceService.UpdateAttendanceRecord(
 		recordID, checkInTime, checkOutTime, status,
-		req.CheckInNote, req.CheckOutNote, &req.EditReason,
+		req.CheckInNote, req.CheckOutNote, req.EditReason,
 		adminID,
 	)
 

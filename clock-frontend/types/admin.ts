@@ -37,7 +37,7 @@ export interface UpdateAttendanceRecordRequest {
   status?: AttendanceStatus;
   check_in_note?: string;
   check_out_note?: string;
-  edit_reason: string;
+  edit_reason?: string;
 }
 
 export interface CreateAttendanceRecordRequest {

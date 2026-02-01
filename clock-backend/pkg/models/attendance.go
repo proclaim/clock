@@ -84,6 +84,64 @@ type AttendanceRecordWithEmployee struct {
 	EmployeeUsername string           `db:"employee_username" json:"employee_username"`
 }
 
+// AttendanceRecordWithEmployeeResponse for API responses
+type AttendanceRecordWithEmployeeResponse struct {
+	ID               int              `json:"id"`
+	EmployeeID       int              `json:"employee_id"`
+	CheckInTime      time.Time        `json:"check_in_time"`
+	CheckOutTime     *time.Time       `json:"check_out_time,omitempty"`
+	Status           AttendanceStatus `json:"status"`
+	CheckInNote      string           `json:"check_in_note,omitempty"`
+	CheckOutNote     string           `json:"check_out_note,omitempty"`
+	CreatedAt        time.Time        `json:"created_at"`
+	UpdatedAt        time.Time        `json:"updated_at"`
+	EditedBy         *int64           `json:"edited_by,omitempty"`
+	EditedAt         *time.Time       `json:"edited_at,omitempty"`
+	EditReason       string           `json:"edit_reason,omitempty"`
+	EmployeeName     string           `json:"employee_name"`
+	EmployeeUsername string           `json:"employee_username"`
+}
+
+// ToResponse converts AttendanceRecordWithEmployee to AttendanceRecordWithEmployeeResponse
+func (a *AttendanceRecordWithEmployee) ToResponse() *AttendanceRecordWithEmployeeResponse {
+	resp := &AttendanceRecordWithEmployeeResponse{
+		ID:               a.ID,
+		EmployeeID:       a.EmployeeID,
+		CheckInTime:      a.CheckInTime,
+		Status:           a.Status,
+		CreatedAt:        a.CreatedAt,
+		UpdatedAt:        a.UpdatedAt,
+		EmployeeName:     a.EmployeeName,
+		EmployeeUsername: a.EmployeeUsername,
+	}
+
+	if a.CheckOutTime.Valid {
+		resp.CheckOutTime = &a.CheckOutTime.Time
+	}
+
+	if a.CheckInNote.Valid {
+		resp.CheckInNote = a.CheckInNote.String
+	}
+
+	if a.CheckOutNote.Valid {
+		resp.CheckOutNote = a.CheckOutNote.String
+	}
+
+	if a.EditedBy.Valid {
+		resp.EditedBy = &a.EditedBy.Int64
+	}
+
+	if a.EditedAt.Valid {
+		resp.EditedAt = &a.EditedAt.Time
+	}
+
+	if a.EditReason.Valid {
+		resp.EditReason = a.EditReason.String
+	}
+
+	return resp
+}
+
 // EmployeeAttendanceSummary represents aggregated attendance data per employee
 type EmployeeAttendanceSummary struct {
 	EmployeeID   int     `db:"employee_id" json:"employee_id"`

@@ -10,10 +10,10 @@ type AdminAttendanceSummaryResponse struct {
 
 // AdminAttendanceRecordsResponse represents paginated attendance records response
 type AdminAttendanceRecordsResponse struct {
-	Records []*models.AttendanceRecordWithEmployee `json:"records"`
-	Total   int                                     `json:"total"`
-	Page    int                                     `json:"page"`
-	PerPage int                                     `json:"per_page"`
+	Records []*models.AttendanceRecordWithEmployeeResponse `json:"records"`
+	Total   int                                            `json:"total"`
+	Page    int                                            `json:"page"`
+	PerPage int                                            `json:"per_page"`
 }
 
 // UpdateAttendanceRecordRequest represents the request body for updating an attendance record
@@ -23,7 +23,7 @@ type UpdateAttendanceRecordRequest struct {
 	Status       *string `json:"status,omitempty"`
 	CheckInNote  *string `json:"check_in_note,omitempty"`
 	CheckOutNote *string `json:"check_out_note,omitempty"`
-	EditReason   string  `json:"edit_reason" validate:"required,min=3"`
+	EditReason   *string `json:"edit_reason,omitempty"`
 }
 
 // CreateAttendanceRecordRequest represents the request body for creating an attendance record

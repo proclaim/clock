@@ -99,6 +99,7 @@
   "Edit Attendance Record": "編輯考勤紀錄",
   "Edit Reason": "編輯原因",
   "Please provide a reason for editing this record (minimum 3 characters)": "請提供編輯此紀錄的原因（至少3個字元）",
+  "Optionally provide a reason for editing this record": "選填：提供編輯此紀錄的原因",
   "Edit reason is required (minimum 3 characters)": "必須輸入編輯原因（至少3個字元）",
   "Cancel": "取消",
   "Save Changes": "儲存變更",

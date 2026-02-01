@@ -61,11 +61,6 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
   const handleSubmit = async () => {
     if (!record) return;
 
-    if (!editReason.trim() || editReason.trim().length < 3) {
-      setError(t('Edit reason is required (minimum 3 characters)'));
-      return;
-    }
-
     setIsSubmitting(true);
     setError('');
 
@@ -76,7 +71,7 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
         status,
         check_in_note: checkInNote || undefined,
         check_out_note: checkOutNote || undefined,
-        edit_reason: editReason,
+        edit_reason: editReason || undefined,
       });
 
       onSaved();
@@ -166,13 +161,12 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                required
                 label={t('Edit Reason')}
                 value={editReason}
                 onChange={(e) => setEditReason(e.target.value)}
                 multiline
                 rows={2}
-                helperText={t('Please provide a reason for editing this record (minimum 3 characters)')}
+                helperText={t('Optionally provide a reason for editing this record')}
               />
             </Grid>
 
