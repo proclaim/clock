@@ -216,6 +216,13 @@ func (s *AdminAttendanceService) UpdateAttendanceRecord(
 		argCount++
 		updates = append(updates, fmt.Sprintf("check_out_time = $%d", argCount))
 		args = append(args, checkOutTime)
+
+		// Auto-update status to CHECKED_OUT if check_out_time is set and status wasn't explicitly provided
+		if status == nil {
+			argCount++
+			updates = append(updates, fmt.Sprintf("status = $%d", argCount))
+			args = append(args, models.StatusCheckedOut)
+		}
 	}
 
 	if status != nil {
