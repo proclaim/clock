@@ -27,6 +27,8 @@ func (h *Handler) GetAdminAttendanceSummary(ctx iris.Context) {
 
 	if endStr := ctx.URLParam("end_date"); endStr != "" {
 		if t, err := time.Parse("2006-01-02", endStr); err == nil {
+			// Add one day to make end date inclusive (filter uses <)
+			t = t.AddDate(0, 0, 1)
 			endDate = &t
 		}
 	}
@@ -75,6 +77,8 @@ func (h *Handler) GetAdminAttendanceRecords(ctx iris.Context) {
 
 	if endStr := ctx.URLParam("end_date"); endStr != "" {
 		if t, err := time.Parse("2006-01-02", endStr); err == nil {
+			// Add one day to make end date inclusive (filter uses <)
+			t = t.AddDate(0, 0, 1)
 			endDate = &t
 		}
 	}
