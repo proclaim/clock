@@ -1,4 +1,4 @@
-import { format, parseISO, differenceInSeconds, isValid } from 'date-fns';
+import { format, parseISO, differenceInMinutes, isValid, startOfMinute } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 import { AttendanceRecord } from '@/types/attendance';
 
@@ -52,15 +52,14 @@ export const calculateDuration = (
   }
 
   try {
-    const checkIn = parseISO(checkInTime);
-    const checkOut = parseISO(checkOutTime);
+    const checkIn = startOfMinute(parseISO(checkInTime));
+    const checkOut = startOfMinute(parseISO(checkOutTime));
 
     if (!isValid(checkIn) || !isValid(checkOut)) {
       return '—';
     }
 
-    const totalSeconds = differenceInSeconds(checkOut, checkIn);
-    const minutes = Math.round(totalSeconds / 60);
+    const minutes = differenceInMinutes(checkOut, checkIn);
 
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -88,9 +87,9 @@ export const calculateTotalDuration = (records: AttendanceRecord[], lang: string
   records.forEach((record) => {
     if (record.check_out_time) {
       try {
-        const checkIn = parseISO(record.check_in_time);
-        const checkOut = parseISO(record.check_out_time);
-        totalMinutes += Math.round(differenceInSeconds(checkOut, checkIn) / 60);
+        const checkIn = startOfMinute(parseISO(record.check_in_time));
+        const checkOut = startOfMinute(parseISO(record.check_out_time));
+        totalMinutes += differenceInMinutes(checkOut, checkIn);
       } catch (e) {
         // ignore invalid dates
       }
