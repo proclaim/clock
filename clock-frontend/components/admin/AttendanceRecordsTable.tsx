@@ -136,9 +136,6 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
             {record.employee_name}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {record.employee_username}
-          </Typography>
         </Box>
         {getStatusChip(record.status)}
       </Box>
@@ -275,9 +272,6 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {record.employee_name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {record.employee_username}
                       </Typography>
                     </TableCell>
                     <TableCell>
