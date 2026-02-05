@@ -79,6 +79,8 @@ func SetupCORS(app *iris.Application, cfg *config.Config) {
 		"https://192.168.0.77",
 		"http://time.tcode.tw",
 		"https://time.tcode.tw",
+		"http://clock.tcode.tw",
+		"https://clock.tcode.tw",
 	}
 
 	// Add configured frontend URL if different from defaults
