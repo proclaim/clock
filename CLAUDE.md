@@ -13,7 +13,7 @@ Docker is located at `/usr/local/bin/docker` on the production server.
 - `clock_postgres_prod` - PostgreSQL database (port 5436:5432)
 - `clock_backend_prod` - Go backend API (port 8080)
 - `clock_frontend_prod` - Next.js frontend (port 3000)
-- `clock_nginx_prod` - Nginx reverse proxy (ports 80, 443)
+- `clock_nginx_prod` - Nginx reverse proxy (port 8082:80, HTTP only - SSL via Cloudflare Tunnel)
 
 ### Useful Commands
 
@@ -77,7 +77,7 @@ ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && gi
 ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && /usr/local/bin/docker build -f clock-backend/Dockerfile -t clock_backend_prod clock-backend/'
 
 # 3. Build frontend image (IMPORTANT: must include NEXT_PUBLIC_API_URL)
-ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && /usr/local/bin/docker build -f clock-frontend/Dockerfile -t clock_frontend_prod --build-arg NEXT_PUBLIC_API_URL=https://192.168.0.77/api/v1 clock-frontend/'
+ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && /usr/local/bin/docker build -f clock-frontend/Dockerfile -t clock_frontend_prod --build-arg NEXT_PUBLIC_API_URL=https://clock.tcode.tw/api/v1 clock-frontend/'
 
 # 4. Restart containers
 ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment && /usr/local/bin/docker compose -f docker-compose.prod.yml up -d clock_backend_prod clock_frontend_prod'
@@ -92,13 +92,40 @@ If the frontend shows `ERR_CONNECTION_REFUSED` to `localhost:8080`, it means `NE
 **Fix:**
 ```bash
 # Rebuild with the correct API URL
-ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && /usr/local/bin/docker build -f clock-frontend/Dockerfile -t clock_frontend_prod --build-arg NEXT_PUBLIC_API_URL=https://192.168.0.77/api/v1 clock-frontend/'
+ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment/repos/clock && /usr/local/bin/docker build -f clock-frontend/Dockerfile -t clock_frontend_prod --build-arg NEXT_PUBLIC_API_URL=https://clock.tcode.tw/api/v1 clock-frontend/'
 
 # Restart frontend
 ssh lachesis@192.168.0.77 'cd /Users/lachesis/clock-deployment && /usr/local/bin/docker compose -f docker-compose.prod.yml up -d clock_frontend_prod'
 ```
 
 After fixing, users may need to hard refresh (Ctrl+Shift+R) to clear cached JS files.
+
+## Cloudflare Tunnel
+
+The clock app is exposed to the public internet via Cloudflare Tunnel (Zero Trust).
+
+- **Public URL**: `https://clock.tcode.tw`
+- **Tunnel routes**: `clock.tcode.tw` → `http://localhost:8082` (clock nginx)
+- **SSL**: Handled entirely by Cloudflare - nginx serves HTTP only on port 8082
+- **cloudflared**: Runs as a macOS LaunchDaemon on the production server (`/Library/LaunchDaemons/com.cloudflare.cloudflared.plist`)
+- **Tunnel config**: Token-based, routing managed in Cloudflare Zero Trust dashboard (not local config)
+
+### Adding/Modifying Tunnel Routes
+
+Tunnel routes are configured in the **Cloudflare Zero Trust dashboard**:
+1. Go to Cloudflare Zero Trust → Networks → Tunnels
+2. Select the tunnel running on 192.168.0.77
+3. Add a public hostname: `clock.tcode.tw` → `http://localhost:8082`
+
+### Restarting cloudflared
+
+```bash
+# Check cloudflared status
+ssh lachesis@192.168.0.77 'ps aux | grep cloudflared'
+
+# Restart via launchctl (requires sudo)
+ssh lachesis@192.168.0.77 'sudo launchctl stop com.cloudflare.cloudflared && sudo launchctl start com.cloudflare.cloudflared'
+```
 
 ## Troubleshooting
 
@@ -147,8 +174,11 @@ ssh lachesis@192.168.0.77 '/usr/local/bin/docker exec clock_backend_prod wget -q
 # Test frontend
 ssh lachesis@192.168.0.77 '/usr/local/bin/docker exec clock_nginx_prod wget -qO- http://clock_frontend_prod:3000/ | head -5'
 
-# Test nginx
-ssh lachesis@192.168.0.77 'curl -sk https://192.168.0.77/ | head -5'
+# Test nginx (local)
+ssh lachesis@192.168.0.77 'curl -s http://localhost:8082/ | head -5'
+
+# Test via Cloudflare Tunnel (public)
+curl -s https://clock.tcode.tw/ | head -5
 ```
 
 ### Database Queries
