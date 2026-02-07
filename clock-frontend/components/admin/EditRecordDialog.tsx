@@ -113,7 +113,14 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
               <DateTimePicker
                 label={t('Check-Out Time')}
                 value={checkOutTime}
-                onChange={(newValue) => setCheckOutTime(newValue)}
+                onChange={(newValue) => {
+                  setCheckOutTime(newValue);
+                  if (newValue && status === 'CHECKED_IN') {
+                    setStatus('CHECKED_OUT');
+                  } else if (!newValue && status === 'CHECKED_OUT') {
+                    setStatus('CHECKED_IN');
+                  }
+                }}
                 slotProps={{
                   textField: {
                     fullWidth: true,
