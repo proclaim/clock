@@ -105,6 +105,8 @@ export const PendingApprovalsTable: React.FC<PendingApprovalsTableProps> = ({
     return `${origDisplay} → ${reqDisplay}`;
   };
 
+  const isAddRequest = (request: AdminEditRequest) => request.request_type === 'ADD';
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" sx={{ py: 4 }}>
@@ -125,7 +127,7 @@ export const PendingApprovalsTable: React.FC<PendingApprovalsTableProps> = ({
         borderRadius: 2,
         boxShadow: 'rgb(145 158 171 / 30%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px',
         borderLeft: '4px solid',
-        borderLeftColor: 'warning.main',
+        borderLeftColor: isAddRequest(request) ? 'info.main' : 'warning.main',
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
@@ -134,21 +136,47 @@ export const PendingApprovalsTable: React.FC<PendingApprovalsTableProps> = ({
             {request.employee_name}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {formatDate(request.original_check_in_time, i18n.language)}
+            {isAddRequest(request)
+              ? (request.requested_check_in_time ? formatDate(request.requested_check_in_time, i18n.language) : '—')
+              : formatDate(request.original_check_in_time!, i18n.language)}
           </Typography>
         </Box>
-        <Chip label={t('Pending')} color="warning" size="small" />
+        <Stack direction="row" spacing={0.5}>
+          <Chip
+            label={isAddRequest(request) ? t('Add') : t('Edit')}
+            color={isAddRequest(request) ? 'info' : 'default'}
+            size="small"
+          />
+          <Chip label={t('Pending')} color="warning" size="small" />
+        </Stack>
       </Box>
 
-      {request.requested_check_in_time && (
-        <Typography variant="body2" sx={{ mb: 0.5 }}>
-          {t('Check-In')}: {formatChange(request.original_check_in_time, request.requested_check_in_time, i18n.language)}
-        </Typography>
-      )}
-      {request.requested_check_out_time && (
-        <Typography variant="body2" sx={{ mb: 0.5 }}>
-          {t('Check-Out')}: {formatChange(request.original_check_out_time, request.requested_check_out_time, i18n.language)}
-        </Typography>
+      {isAddRequest(request) ? (
+        <>
+          {request.requested_check_in_time && (
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+              {t('Check-In')}: {formatTime(request.requested_check_in_time, i18n.language)}
+            </Typography>
+          )}
+          {request.requested_check_out_time && (
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+              {t('Check-Out')}: {formatTime(request.requested_check_out_time, i18n.language)}
+            </Typography>
+          )}
+        </>
+      ) : (
+        <>
+          {request.requested_check_in_time && (
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+              {t('Check-In')}: {formatChange(request.original_check_in_time, request.requested_check_in_time, i18n.language)}
+            </Typography>
+          )}
+          {request.requested_check_out_time && (
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+              {t('Check-Out')}: {formatChange(request.original_check_out_time, request.requested_check_out_time, i18n.language)}
+            </Typography>
+          )}
+        </>
       )}
       {request.note && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontStyle: 'italic' }}>
@@ -186,7 +214,7 @@ export const PendingApprovalsTable: React.FC<PendingApprovalsTableProps> = ({
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Typography variant="h5" component="h2" sx={{ fontWeight: 700 }}>
-            {t('Pending Edit Requests')}
+            {t('Pending Requests')}
           </Typography>
           <Chip label={requests.length} color="warning" size="small" />
         </Box>
@@ -209,6 +237,7 @@ export const PendingApprovalsTable: React.FC<PendingApprovalsTableProps> = ({
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: 'warning.lighter' }}>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('Type')}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{t('Employee')}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{t('Date')}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{t('Requested Changes')}</TableCell>
@@ -220,25 +249,51 @@ export const PendingApprovalsTable: React.FC<PendingApprovalsTableProps> = ({
                 {requests.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell>
+                      <Chip
+                        label={isAddRequest(request) ? t('Add') : t('Edit')}
+                        color={isAddRequest(request) ? 'info' : 'default'}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {request.employee_name}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {formatDate(request.original_check_in_time, i18n.language)}
+                        {isAddRequest(request)
+                          ? (request.requested_check_in_time ? formatDate(request.requested_check_in_time, i18n.language) : '—')
+                          : formatDate(request.original_check_in_time!, i18n.language)}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      {request.requested_check_in_time && (
-                        <Typography variant="body2">
-                          {t('Check-In')}: {formatChange(request.original_check_in_time, request.requested_check_in_time, i18n.language)}
-                        </Typography>
-                      )}
-                      {request.requested_check_out_time && (
-                        <Typography variant="body2">
-                          {t('Check-Out')}: {formatChange(request.original_check_out_time, request.requested_check_out_time, i18n.language)}
-                        </Typography>
+                      {isAddRequest(request) ? (
+                        <>
+                          {request.requested_check_in_time && (
+                            <Typography variant="body2">
+                              {t('Check-In')}: {formatTime(request.requested_check_in_time, i18n.language)}
+                            </Typography>
+                          )}
+                          {request.requested_check_out_time && (
+                            <Typography variant="body2">
+                              {t('Check-Out')}: {formatTime(request.requested_check_out_time, i18n.language)}
+                            </Typography>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {request.requested_check_in_time && (
+                            <Typography variant="body2">
+                              {t('Check-In')}: {formatChange(request.original_check_in_time, request.requested_check_in_time, i18n.language)}
+                            </Typography>
+                          )}
+                          {request.requested_check_out_time && (
+                            <Typography variant="body2">
+                              {t('Check-Out')}: {formatChange(request.original_check_out_time, request.requested_check_out_time, i18n.language)}
+                            </Typography>
+                          )}
+                        </>
                       )}
                     </TableCell>
                     <TableCell>

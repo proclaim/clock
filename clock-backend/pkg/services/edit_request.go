@@ -82,12 +82,12 @@ func (s *EditRequestService) SubmitEditRequest(
 
 	query := `
 		INSERT INTO edit_requests (
-			attendance_record_id, employee_id,
+			attendance_record_id, employee_id, request_type,
 			requested_check_in_time, requested_check_out_time,
 			note, status, created_at, updated_at
 		)
-		VALUES ($1, $2, $3, $4, $5, 'PENDING', NOW(), NOW())
-		RETURNING id, attendance_record_id, employee_id,
+		VALUES ($1, $2, 'EDIT', $3, $4, $5, 'PENDING', NOW(), NOW())
+		RETURNING id, attendance_record_id, employee_id, request_type,
 		          requested_check_in_time, requested_check_out_time,
 		          note, status, reviewed_by, reviewed_at, review_note,
 		          created_at, updated_at
@@ -118,7 +118,7 @@ func (s *EditRequestService) SubmitEditRequest(
 // GetEmployeeEditRequests returns edit requests for a specific employee
 func (s *EditRequestService) GetEmployeeEditRequests(employeeID int) ([]*models.EditRequest, error) {
 	query := `
-		SELECT id, attendance_record_id, employee_id,
+		SELECT id, attendance_record_id, employee_id, request_type,
 		       requested_check_in_time, requested_check_out_time,
 		       note, status, reviewed_by, reviewed_at, review_note,
 		       created_at, updated_at
@@ -141,7 +141,7 @@ func (s *EditRequestService) GetEmployeeEditRequests(employeeID int) ([]*models.
 // GetPendingEditRequests returns all pending edit requests with details (admin)
 func (s *EditRequestService) GetPendingEditRequests() ([]*models.EditRequestWithDetails, error) {
 	query := `
-		SELECT er.id, er.attendance_record_id, er.employee_id,
+		SELECT er.id, er.attendance_record_id, er.employee_id, er.request_type,
 		       e.name as employee_name, e.username as employee_username,
 		       er.requested_check_in_time, er.requested_check_out_time,
 		       er.note, er.status, er.reviewed_by, er.reviewed_at, er.review_note,
@@ -151,7 +151,7 @@ func (s *EditRequestService) GetPendingEditRequests() ([]*models.EditRequestWith
 		       ar.status as original_status
 		FROM edit_requests er
 		INNER JOIN employees e ON er.employee_id = e.id
-		INNER JOIN attendance_records ar ON er.attendance_record_id = ar.id
+		LEFT JOIN attendance_records ar ON er.attendance_record_id = ar.id
 		WHERE er.status = 'PENDING'
 		ORDER BY er.created_at ASC
 	`
@@ -166,12 +166,64 @@ func (s *EditRequestService) GetPendingEditRequests() ([]*models.EditRequestWith
 	return requests, nil
 }
 
+// SubmitAddRequest creates a new ADD request for an employee to request a new attendance record
+func (s *EditRequestService) SubmitAddRequest(
+	employeeID int,
+	checkInTime time.Time,
+	checkOutTime *time.Time,
+	note string,
+) (*models.EditRequest, error) {
+	checkInTimeValue := sql.NullTime{Time: checkInTime, Valid: true}
+
+	var checkOutTimeValue sql.NullTime
+	if checkOutTime != nil {
+		checkOutTimeValue = sql.NullTime{Time: *checkOutTime, Valid: true}
+	}
+
+	var noteValue sql.NullString
+	if note != "" {
+		noteValue = sql.NullString{String: note, Valid: true}
+	}
+
+	query := `
+		INSERT INTO edit_requests (
+			employee_id, request_type,
+			requested_check_in_time, requested_check_out_time,
+			note, status, created_at, updated_at
+		)
+		VALUES ($1, 'ADD', $2, $3, $4, 'PENDING', NOW(), NOW())
+		RETURNING id, attendance_record_id, employee_id, request_type,
+		          requested_check_in_time, requested_check_out_time,
+		          note, status, reviewed_by, reviewed_at, review_note,
+		          created_at, updated_at
+	`
+
+	var editRequest models.EditRequest
+	err := s.db.QueryRowx(query,
+		employeeID,
+		checkInTimeValue, checkOutTimeValue,
+		noteValue,
+	).StructScan(&editRequest)
+
+	if err != nil {
+		s.logger.Error("Failed to create add request", zap.Error(err),
+			zap.Int("employee_id", employeeID))
+		return nil, err
+	}
+
+	s.logger.Info("Add request submitted",
+		zap.Int("edit_request_id", editRequest.ID),
+		zap.Int("employee_id", employeeID))
+
+	return &editRequest, nil
+}
+
 // ApproveEditRequest approves an edit request and applies changes to the attendance record
 func (s *EditRequestService) ApproveEditRequest(editRequestID, adminID int, reviewNote string) error {
 	// Get the edit request
 	var editRequest models.EditRequest
 	err := s.db.Get(&editRequest, `
-		SELECT id, attendance_record_id, employee_id,
+		SELECT id, attendance_record_id, employee_id, request_type,
 		       requested_check_in_time, requested_check_out_time,
 		       note, status, reviewed_by, reviewed_at, review_note,
 		       created_at, updated_at
@@ -198,52 +250,85 @@ func (s *EditRequestService) ApproveEditRequest(editRequestID, adminID int, revi
 	}
 	defer tx.Rollback()
 
-	// Apply changes to attendance record
-	updates := []string{"updated_at = NOW()", "edited_at = NOW()"}
-	args := []interface{}{}
-	argCount := 0
+	if editRequest.RequestType == models.EditRequestTypeAdd {
+		// For ADD requests: create a new attendance record
+		status := models.StatusCheckedIn
+		if editRequest.RequestedCheckOutTime.Valid {
+			status = models.StatusCheckedOut
+		}
 
-	argCount++
-	updates = append(updates, fmt.Sprintf("edited_by = $%d", argCount))
-	args = append(args, adminID)
+		reason := "Approved add request"
+		if editRequest.Note.Valid {
+			reason = editRequest.Note.String
+		}
 
-	reason := "Approved edit request"
-	if editRequest.Note.Valid {
-		reason = editRequest.Note.String
-	}
-	argCount++
-	updates = append(updates, fmt.Sprintf("edit_reason = $%d", argCount))
-	args = append(args, reason)
+		_, err = tx.Exec(`
+			INSERT INTO attendance_records (
+				employee_id, check_in_time, check_out_time, status,
+				edited_by, edited_at, edit_reason,
+				created_at, updated_at
+			)
+			VALUES ($1, $2, $3, $4, $5, NOW(), $6, NOW(), NOW())
+		`, editRequest.EmployeeID,
+			editRequest.RequestedCheckInTime.Time,
+			editRequest.RequestedCheckOutTime,
+			status,
+			adminID,
+			reason,
+		)
+		if err != nil {
+			s.logger.Error("Failed to create attendance record from add request", zap.Error(err),
+				zap.Int("edit_request_id", editRequestID))
+			return err
+		}
+	} else {
+		// For EDIT requests: update existing attendance record
+		updates := []string{"updated_at = NOW()", "edited_at = NOW()"}
+		args := []interface{}{}
+		argCount := 0
 
-	if editRequest.RequestedCheckInTime.Valid {
 		argCount++
-		updates = append(updates, fmt.Sprintf("check_in_time = $%d", argCount))
-		args = append(args, editRequest.RequestedCheckInTime.Time)
-	}
+		updates = append(updates, fmt.Sprintf("edited_by = $%d", argCount))
+		args = append(args, adminID)
 
-	if editRequest.RequestedCheckOutTime.Valid {
+		reason := "Approved edit request"
+		if editRequest.Note.Valid {
+			reason = editRequest.Note.String
+		}
 		argCount++
-		updates = append(updates, fmt.Sprintf("check_out_time = $%d", argCount))
-		args = append(args, editRequest.RequestedCheckOutTime.Time)
+		updates = append(updates, fmt.Sprintf("edit_reason = $%d", argCount))
+		args = append(args, reason)
 
-		// Auto-update status to CHECKED_OUT
+		if editRequest.RequestedCheckInTime.Valid {
+			argCount++
+			updates = append(updates, fmt.Sprintf("check_in_time = $%d", argCount))
+			args = append(args, editRequest.RequestedCheckInTime.Time)
+		}
+
+		if editRequest.RequestedCheckOutTime.Valid {
+			argCount++
+			updates = append(updates, fmt.Sprintf("check_out_time = $%d", argCount))
+			args = append(args, editRequest.RequestedCheckOutTime.Time)
+
+			// Auto-update status to CHECKED_OUT
+			argCount++
+			updates = append(updates, fmt.Sprintf("status = $%d", argCount))
+			args = append(args, models.StatusCheckedOut)
+		}
+
 		argCount++
-		updates = append(updates, fmt.Sprintf("status = $%d", argCount))
-		args = append(args, models.StatusCheckedOut)
-	}
+		args = append(args, editRequest.AttendanceRecordID.Int64)
 
-	argCount++
-	args = append(args, editRequest.AttendanceRecordID)
+		updateQuery := fmt.Sprintf(`
+			UPDATE attendance_records SET %s WHERE id = $%d AND deleted_at IS NULL
+		`, strings.Join(updates, ", "), argCount)
 
-	updateQuery := fmt.Sprintf(`
-		UPDATE attendance_records SET %s WHERE id = $%d AND deleted_at IS NULL
-	`, strings.Join(updates, ", "), argCount)
-
-	_, err = tx.Exec(updateQuery, args...)
-	if err != nil {
-		s.logger.Error("Failed to apply edit request changes", zap.Error(err),
-			zap.Int("edit_request_id", editRequestID))
-		return err
+		_, err = tx.Exec(updateQuery, args...)
+		if err != nil {
+			s.logger.Error("Failed to apply edit request changes", zap.Error(err),
+				zap.Int("edit_request_id", editRequestID))
+			return err
+		}
 	}
 
 	// Update edit request status

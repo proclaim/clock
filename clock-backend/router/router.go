@@ -48,6 +48,7 @@ func Setup(app *iris.Application, handler *handlers.Handler, cfg *config.Config,
 				// Edit requests (employee self-edit)
 				attendance.Post("/edit-requests", handler.SubmitEditRequest)
 				attendance.Get("/edit-requests", handler.GetMyEditRequests)
+				attendance.Post("/add-requests", handler.SubmitAddRequest)
 			}
 
 			// Leave routes (staff can create and view their own leaves)

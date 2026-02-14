@@ -52,8 +52,9 @@ export interface CreateAttendanceRecordRequest {
 
 export interface AdminEditRequest {
   id: number;
-  attendance_record_id: number;
+  attendance_record_id: number | null;
   employee_id: number;
+  request_type: 'EDIT' | 'ADD';
   employee_name: string;
   employee_username: string;
   requested_check_in_time: string | null;
@@ -64,9 +65,9 @@ export interface AdminEditRequest {
   reviewed_at: string | null;
   review_note: string | null;
   created_at: string;
-  original_check_in_time: string;
+  original_check_in_time: string | null;
   original_check_out_time: string | null;
-  original_status: string;
+  original_status: string | null;
 }
 
 export interface AdminEditRequestListResponse {

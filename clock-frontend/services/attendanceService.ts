@@ -7,6 +7,7 @@ import {
   AttendanceStatusResponse,
   AttendanceRecordsResponse,
   SubmitEditRequestPayload,
+  SubmitAddRequestPayload,
   EditRequest,
   EditRequestListResponse,
 } from '@/types/attendance';
@@ -82,6 +83,18 @@ class AttendanceService {
         throw new Error(error.response.data.error);
       }
       throw new Error('Failed to submit edit request');
+    }
+  }
+
+  async submitAddRequest(data: SubmitAddRequestPayload): Promise<EditRequest> {
+    try {
+      const response = await api.post<EditRequest>('/attendance/add-requests', data);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to submit add request');
     }
   }
 

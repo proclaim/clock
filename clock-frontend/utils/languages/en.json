@@ -167,5 +167,11 @@
   "Reject": "Reject",
   "Reject Edit Request": "Reject Edit Request",
   "Reason for Rejection (optional)": "Reason for Rejection (optional)",
-  "Rejecting...": "Rejecting..."
+  "Rejecting...": "Rejecting...",
+  "Request Add Record": "Request Add Record",
+  "Your add request will be reviewed by an admin before a new record is created.": "Your add request will be reviewed by an admin before a new record is created.",
+  "Failed to submit add request": "Failed to submit add request",
+  "Pending Requests": "Pending Requests",
+  "Type": "Type",
+  "Add": "Add"
 }

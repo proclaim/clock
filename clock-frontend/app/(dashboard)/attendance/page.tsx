@@ -10,9 +10,11 @@ import { CheckInButton } from '@/components/attendance/CheckInButton';
 import { CheckOutButton } from '@/components/attendance/CheckOutButton';
 import { MonthSelector } from '@/components/attendance/MonthSelector';
 import { AttendanceTable } from '@/components/attendance/AttendanceTable';
+import { AddRequestDialog } from '@/components/attendance/AddRequestDialog';
 import { attendanceService } from '@/services/attendanceService';
 import { AttendanceRecord } from '@/types/attendance';
 import { getCurrentMonth, calculateTotalDuration } from '@/utils/dateUtils';
+import AddIcon from '@mui/icons-material/Add';
 
 export default function AttendancePage() {
   const { t, i18n } = useTranslation();
@@ -27,6 +29,7 @@ export default function AttendancePage() {
   const { year: currentYear, month: currentMonth } = getCurrentMonth();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [addRequestOpen, setAddRequestOpen] = useState(false);
 
   const loadStatus = async () => {
     try {
@@ -158,6 +161,13 @@ export default function AttendancePage() {
         >
           <CheckInButton disabled={isCheckedIn} onSuccess={handleRefresh} />
           <CheckOutButton disabled={!isCheckedIn} onSuccess={handleRefresh} />
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={() => setAddRequestOpen(true)}
+          >
+            {t('Request Add Record')}
+          </Button>
         </Box>
       </Paper>
 
@@ -180,6 +190,12 @@ export default function AttendancePage() {
       ) : (
         <AttendanceTable records={records} onEditRequestSubmitted={loadRecords} />
       )}
+
+      <AddRequestDialog
+        open={addRequestOpen}
+        onClose={() => setAddRequestOpen(false)}
+        onSubmitted={loadRecords}
+      />
     </Container>
   );
 }

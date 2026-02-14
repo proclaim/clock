@@ -167,5 +167,11 @@
   "Reject": "駁回",
   "Reject Edit Request": "駁回修改申請",
   "Reason for Rejection (optional)": "駁回原因（選填）",
-  "Rejecting...": "正在駁回..."
+  "Rejecting...": "正在駁回...",
+  "Request Add Record": "申請新增紀錄",
+  "Your add request will be reviewed by an admin before a new record is created.": "您的新增紀錄申請將由管理員審核後才會建立。",
+  "Failed to submit add request": "提交新增紀錄申請失敗",
+  "Pending Requests": "待審核申請",
+  "Type": "類型",
+  "Add": "新增"
 }

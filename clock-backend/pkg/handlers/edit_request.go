@@ -68,6 +68,44 @@ func (h *Handler) SubmitEditRequest(ctx iris.Context) {
 	h.respondWithJSON(ctx, iris.StatusCreated, editRequest.ToResponse())
 }
 
+// SubmitAddRequest handles employee add request submission
+func (h *Handler) SubmitAddRequest(ctx iris.Context) {
+	employeeID := middleware.GetEmployeeID(ctx)
+
+	var req reqres.SubmitAddRequestRequest
+	if err := ctx.ReadJSON(&req); err != nil {
+		h.respondWithError(ctx, iris.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	checkInTime, err := time.Parse(time.RFC3339, req.CheckInTime)
+	if err != nil {
+		h.respondWithError(ctx, iris.StatusBadRequest, "Invalid check-in time format")
+		return
+	}
+
+	var checkOutTime *time.Time
+	if req.CheckOutTime != nil {
+		if t, err := time.Parse(time.RFC3339, *req.CheckOutTime); err == nil {
+			checkOutTime = &t
+		} else {
+			h.respondWithError(ctx, iris.StatusBadRequest, "Invalid check-out time format")
+			return
+		}
+	}
+
+	editRequest, err := h.editRequestService.SubmitAddRequest(
+		employeeID, checkInTime, checkOutTime, req.Note,
+	)
+	if err != nil {
+		h.logger.Error("Failed to submit add request", zap.Error(err))
+		h.respondWithError(ctx, iris.StatusInternalServerError, "Internal server error")
+		return
+	}
+
+	h.respondWithJSON(ctx, iris.StatusCreated, editRequest.ToResponse())
+}
+
 // GetMyEditRequests handles fetching employee's own edit requests
 func (h *Handler) GetMyEditRequests(ctx iris.Context) {
 	employeeID := middleware.GetEmployeeID(ctx)

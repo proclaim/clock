@@ -22,6 +22,13 @@ type AdminEditRequestListResponse struct {
 	Total        int                                      `json:"total"`
 }
 
+// SubmitAddRequestRequest represents the request body for submitting an add request
+type SubmitAddRequestRequest struct {
+	CheckInTime  string  `json:"check_in_time" validate:"required"`
+	CheckOutTime *string `json:"check_out_time,omitempty"`
+	Note         string  `json:"note"`
+}
+
 // ReviewEditRequestRequest represents the request body for approving/rejecting an edit request
 type ReviewEditRequestRequest struct {
 	ReviewNote string `json:"review_note,omitempty"`

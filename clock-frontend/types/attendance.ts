@@ -46,10 +46,13 @@ export interface AttendanceRecordsResponse {
 
 export type EditRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
+export type EditRequestType = 'EDIT' | 'ADD';
+
 export interface EditRequest {
   id: number;
-  attendance_record_id: number;
+  attendance_record_id: number | null;
   employee_id: number;
+  request_type: EditRequestType;
   requested_check_in_time: string | null;
   requested_check_out_time: string | null;
   note: string | null;
@@ -63,6 +66,12 @@ export interface EditRequest {
 export interface SubmitEditRequestPayload {
   attendance_record_id: number;
   check_in_time?: string;
+  check_out_time?: string;
+  note: string;
+}
+
+export interface SubmitAddRequestPayload {
+  check_in_time: string;
   check_out_time?: string;
   note: string;
 }
