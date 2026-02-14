@@ -52,7 +52,11 @@
       "Bash(npx:*)",
       "Bash(pip3 install:*)",
       "Bash(git -C /Users/jim/clock log --oneline)",
-      "Bash(git -C /Users/jim/clock show 9fb0104 --stat)"
+      "Bash(git -C /Users/jim/clock show 9fb0104 --stat)",
+      "Bash(npm run build:*)",
+      "Bash(dig:*)",
+      "Bash(openssl s_client:*)",
+      "Bash(openssl x509:*)"
     ]
   }
 }

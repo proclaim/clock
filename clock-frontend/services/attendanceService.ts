@@ -6,6 +6,9 @@ import {
   CheckOutResponse,
   AttendanceStatusResponse,
   AttendanceRecordsResponse,
+  SubmitEditRequestPayload,
+  EditRequest,
+  EditRequestListResponse,
 } from '@/types/attendance';
 
 class AttendanceService {
@@ -68,6 +71,29 @@ class AttendanceService {
         throw new Error(error.response.data.error);
       }
       throw new Error('Failed to get attendance records');
+    }
+  }
+  async submitEditRequest(data: SubmitEditRequestPayload): Promise<EditRequest> {
+    try {
+      const response = await api.post<EditRequest>('/attendance/edit-requests', data);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to submit edit request');
+    }
+  }
+
+  async getEditRequests(): Promise<EditRequestListResponse> {
+    try {
+      const response = await api.get<EditRequestListResponse>('/attendance/edit-requests');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to get edit requests');
     }
   }
 }

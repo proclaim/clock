@@ -21,8 +21,9 @@ import {
   Stack,
   useMediaQuery,
   useTheme,
+  alpha,
 } from '@mui/material';
-import { Edit, Delete, Add, Info } from '@mui/icons-material';
+import { Edit, Delete, Add, Info, ErrorOutline } from '@mui/icons-material';
 import { adminService } from '@/services/adminService';
 import { AttendanceRecordWithEmployee } from '@/types/admin';
 import { Employee } from '@/types/auth';
@@ -107,8 +108,30 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
     if (onRecordUpdated) onRecordUpdated();
   };
 
-  const getStatusChip = (status: string) => {
-    switch (status) {
+  const isMissingCheckOut = (record: AttendanceRecordWithEmployee): boolean => {
+    if (record.status !== 'CHECKED_IN' || record.check_out_time) return false;
+    const checkInDate = new Date(record.check_in_time);
+    const today = new Date();
+    return checkInDate.toDateString() !== today.toDateString();
+  };
+
+  const getRowBgColor = (record: AttendanceRecordWithEmployee): string => {
+    if (isMissingCheckOut(record)) return alpha(theme.palette.error.main, 0.08);
+    if (record.status === 'AUTO_CLOSED') return 'warning.lighter';
+    return 'inherit';
+  };
+
+  const getMobileBgColor = (record: AttendanceRecordWithEmployee): string => {
+    if (isMissingCheckOut(record)) return alpha(theme.palette.error.main, 0.08);
+    if (record.status === 'AUTO_CLOSED') return 'warning.lighter';
+    return 'background.paper';
+  };
+
+  const getStatusChip = (record: AttendanceRecordWithEmployee) => {
+    if (isMissingCheckOut(record)) {
+      return <Chip icon={<ErrorOutline />} label={t('Missing Check-Out')} color="error" size="small" />;
+    }
+    switch (record.status) {
       case 'CHECKED_OUT':
         return <Chip label={t('Checked Out')} color="success" size="small" />;
       case 'CHECKED_IN':
@@ -116,7 +139,7 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
       case 'AUTO_CLOSED':
         return <Chip label={t('Auto-Closed')} color="warning" size="small" />;
       default:
-        return <Chip label={status} size="small" />;
+        return <Chip label={record.status} size="small" />;
     }
   };
 
@@ -128,7 +151,7 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
         p: 2,
         borderRadius: 2,
         boxShadow: 'rgb(145 158 171 / 30%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px',
-        bgcolor: record.status === 'AUTO_CLOSED' ? 'warning.lighter' : 'background.paper',
+        bgcolor: getMobileBgColor(record),
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
@@ -137,7 +160,7 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
             {record.employee_name}
           </Typography>
         </Box>
-        {getStatusChip(record.status)}
+        {getStatusChip(record)}
       </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
         {formatDate(record.check_in_time, i18n.language)}
@@ -265,7 +288,7 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
                     key={record.id}
                     sx={{
                       '&:last-child td, &:last-child th': { border: 0 },
-                      bgcolor: record.status === 'AUTO_CLOSED' ? 'warning.lighter' : 'inherit',
+                      bgcolor: getRowBgColor(record),
                       '&:hover': { bgcolor: 'grey.50' },
                     }}
                   >
@@ -300,7 +323,7 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
                         {calculateDuration(record.check_in_time, record.check_out_time as any, i18n.language)}
                       </Typography>
                     </TableCell>
-                    <TableCell>{getStatusChip(record.status)}</TableCell>
+                    <TableCell>{getStatusChip(record)}</TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
                         {record.edited_at && (

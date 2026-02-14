@@ -6,6 +6,7 @@ import {
   CreateAttendanceRecordRequest,
   CreateEmployeeRequest,
   AttendanceRecordWithEmployee,
+  AdminEditRequestListResponse,
 } from '@/types/admin';
 import { Employee } from '@/types/auth';
 import {
@@ -236,6 +237,47 @@ class AdminService {
         throw new Error(error.response.data.error);
       }
       throw new Error('Failed to delete leave record');
+    }
+  }
+
+  // Get pending edit requests
+  async getPendingEditRequests(): Promise<AdminEditRequestListResponse> {
+    try {
+      const response = await api.get<AdminEditRequestListResponse>('/admin/edit-requests');
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to get pending edit requests');
+    }
+  }
+
+  // Approve an edit request
+  async approveEditRequest(editRequestId: number, reviewNote?: string): Promise<void> {
+    try {
+      await api.put(`/admin/edit-requests/${editRequestId}/approve`, {
+        review_note: reviewNote || '',
+      });
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to approve edit request');
+    }
+  }
+
+  // Reject an edit request
+  async rejectEditRequest(editRequestId: number, reviewNote?: string): Promise<void> {
+    try {
+      await api.put(`/admin/edit-requests/${editRequestId}/reject`, {
+        review_note: reviewNote || '',
+      });
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to reject edit request');
     }
   }
 }

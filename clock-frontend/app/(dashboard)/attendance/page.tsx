@@ -178,7 +178,7 @@ export default function AttendancePage() {
           <CircularProgress />
         </Box>
       ) : (
-        <AttendanceTable records={records} />
+        <AttendanceTable records={records} onEditRequestSubmitted={loadRecords} />
       )}
     </Container>
   );

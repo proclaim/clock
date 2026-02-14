@@ -44,6 +44,10 @@ func Setup(app *iris.Application, handler *handlers.Handler, cfg *config.Config,
 				attendance.Post("/check-out", handler.CheckOut)
 				attendance.Get("/status", handler.GetStatus)
 				attendance.Get("/records", handler.GetRecords)
+
+				// Edit requests (employee self-edit)
+				attendance.Post("/edit-requests", handler.SubmitEditRequest)
+				attendance.Get("/edit-requests", handler.GetMyEditRequests)
 			}
 
 			// Leave routes (staff can create and view their own leaves)
@@ -61,6 +65,14 @@ func Setup(app *iris.Application, handler *handlers.Handler, cfg *config.Config,
 				admin.Post("/employees", handler.CreateEmployee)
 				admin.Put("/employees/:id/status", handler.UpdateEmployeeStatus)
 				admin.Put("/employees/:id/password", handler.ResetEmployeePassword)
+
+				// Edit request management
+				adminEditRequests := admin.Party("/edit-requests")
+				{
+					adminEditRequests.Get("", handler.GetPendingEditRequests)
+					adminEditRequests.Put("/:id/approve", handler.ApproveEditRequest)
+					adminEditRequests.Put("/:id/reject", handler.RejectEditRequest)
+				}
 
 				// Attendance management
 				adminAttendance := admin.Party("/attendance")

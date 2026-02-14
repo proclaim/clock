@@ -22,6 +22,10 @@ var (
 	ErrPasswordTooShort    = errors.New("new password must be at least 6 characters")
 	ErrUsernameTaken       = errors.New("username is already taken")
 
+	// Edit request errors
+	ErrEditRequestAlreadyPending  = errors.New("there is already a pending edit request for this record")
+	ErrEditRequestAlreadyReviewed = errors.New("this edit request has already been reviewed")
+
 	// Leave errors
 	ErrLeaveOverlap = errors.New("leave dates overlap with an existing leave record")
 

@@ -23,6 +23,7 @@ import { EmployeeAttendanceSummary } from '@/types/admin';
 import { Employee } from '@/types/auth';
 import { EmployeeSummaryTable } from '@/components/admin/EmployeeSummaryTable';
 import { AttendanceRecordsTable } from '@/components/admin/AttendanceRecordsTable';
+import { PendingApprovalsTable } from '@/components/admin/PendingApprovalsTable';
 import { ResetPasswordDialog } from '@/components/admin/ResetPasswordDialog';
 
 export default function AdminDashboardPage() {
@@ -176,6 +177,9 @@ export default function AdminDashboardPage() {
           </Grid>
         </Grid>
       </Paper>
+
+      {/* Pending Edit Requests */}
+      <PendingApprovalsTable onApprovalAction={loadData} />
 
       {/* Attendance Records Table */}
       <Box sx={{ mb: 4 }}>
