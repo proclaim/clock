@@ -44,7 +44,7 @@ func (s *AdminAttendanceService) GetAllEmployeesAttendanceSummary(
 			COALESCE(SUM(
 				CASE
 					WHEN ar.check_out_time IS NOT NULL
-					THEN EXTRACT(EPOCH FROM (ar.check_out_time - ar.check_in_time)) / 60
+					THEN EXTRACT(EPOCH FROM (DATE_TRUNC('minute', ar.check_out_time) - DATE_TRUNC('minute', ar.check_in_time))) / 60
 					ELSE 0
 				END
 			), 0) as total_minutes
