@@ -201,7 +201,10 @@ export const AttendanceRecordsTable: React.FC<AttendanceRecordsTableProps> = ({
 
   return (
     <>
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 700 }}>
+          {t('Attendance Records')}
+        </Typography>
         <Button
           variant="contained"
           startIcon={<Add />}

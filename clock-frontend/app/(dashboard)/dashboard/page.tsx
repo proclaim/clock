@@ -183,9 +183,6 @@ export default function AdminDashboardPage() {
 
       {/* Attendance Records Table */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 3 }}>
-          {t('Attendance Records')}
-        </Typography>
         <AttendanceRecordsTable
           startDate={startDate}
           endDate={endDate}
