@@ -67,7 +67,7 @@ export const PendingApprovalsTable: React.FC<PendingApprovalsTableProps> = ({
     setIsProcessing(true);
     try {
       await adminService.approveEditRequest(request.id);
-      loadRequests();
+      setRequests((prev) => prev.filter((r) => r.id !== request.id));
       if (onApprovalAction) onApprovalAction();
     } catch (error) {
       console.error('Failed to approve edit request:', error);
@@ -88,8 +88,8 @@ export const PendingApprovalsTable: React.FC<PendingApprovalsTableProps> = ({
     try {
       await adminService.rejectEditRequest(selectedRequest.id, reviewNote);
       setRejectDialogOpen(false);
+      setRequests((prev) => prev.filter((r) => r.id !== selectedRequest.id));
       setSelectedRequest(null);
-      loadRequests();
       if (onApprovalAction) onApprovalAction();
     } catch (error) {
       console.error('Failed to reject edit request:', error);
