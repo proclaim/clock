@@ -185,12 +185,21 @@ export const Header: React.FC = () => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={handleAttendance}>
-              <ListItemIcon>
-                <AccessTime fontSize="small" />
-              </ListItemIcon>
-              {t('Attendance')}
-            </MenuItem>
+            {isAdmin ? (
+              <MenuItem onClick={() => { handleClose(); router.push('/dashboard'); }}>
+                <ListItemIcon>
+                  <AccessTime fontSize="small" />
+                </ListItemIcon>
+                {t('Admin Dashboard')}
+              </MenuItem>
+            ) : (
+              <MenuItem onClick={handleAttendance}>
+                <ListItemIcon>
+                  <AccessTime fontSize="small" />
+                </ListItemIcon>
+                {t('Attendance')}
+              </MenuItem>
+            )}
             <MenuItem onClick={handleLeave}>
               <ListItemIcon>
                 <EventBusy fontSize="small" />
