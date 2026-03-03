@@ -14,7 +14,7 @@ interface MonthSelectorProps {
 export const MonthSelector: React.FC<MonthSelectorProps> = ({ year, month, onChange }) => {
   const { t, i18n } = useTranslation();
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 3 }, (_, i) => currentYear - i);
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
   return (

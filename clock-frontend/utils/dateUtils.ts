@@ -105,6 +105,15 @@ export const calculateTotalDuration = (records: AttendanceRecord[], lang: string
   return `${hours}h ${mins}m`;
 };
 
+export const formatDurationMinutes = (totalMinutes: number, lang: string = 'en'): string => {
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  if (lang === 'zh-TW') {
+    return `${hours}小時 ${mins}分`;
+  }
+  return `${hours}h ${mins}m`;
+};
+
 export const getCurrentMonth = (): { year: number; month: number } => {
   const now = new Date();
   return {

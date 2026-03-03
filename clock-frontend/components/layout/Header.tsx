@@ -22,6 +22,7 @@ import {
   Language,
   Lock,
   EventBusy,
+  Payments,
 } from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 
@@ -66,6 +67,11 @@ export const Header: React.FC = () => {
   const handleLeave = () => {
     handleClose();
     router.push('/leave');
+  };
+
+  const handlePayroll = () => {
+    handleClose();
+    router.push('/admin/payroll');
   };
 
   const handleLogout = async () => {
@@ -191,6 +197,14 @@ export const Header: React.FC = () => {
               </ListItemIcon>
               {t('Leave')}
             </MenuItem>
+            {isAdmin && (
+              <MenuItem onClick={handlePayroll}>
+                <ListItemIcon>
+                  <Payments fontSize="small" />
+                </ListItemIcon>
+                {t('Payroll')}
+              </MenuItem>
+            )}
             <MenuItem onClick={handleSettings}>
               <ListItemIcon>
                 <Settings fontSize="small" />
