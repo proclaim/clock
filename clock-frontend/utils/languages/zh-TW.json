@@ -173,5 +173,10 @@
   "Failed to submit add request": "提交新增紀錄申請失敗",
   "Pending Requests": "待審核申請",
   "Type": "類型",
-  "Add": "新增"
+  "Add": "新增",
+  "Payroll": "薪資計算",
+  "Salary Calculator": "薪資試算",
+  "Hourly Rate": "時薪",
+  "No active employees found.": "找不到在職員工。",
+  "hr": "時"
 }

@@ -130,7 +130,7 @@ export default function PayrollPage() {
   const currentRate = currentEmployee ? (hourlyRates[currentEmployee.id] ?? '') : '';
   const salary =
     currentRate && parseFloat(currentRate) > 0
-      ? ((totalMinutes / 60) * parseFloat(currentRate)).toFixed(2)
+      ? Math.round((totalMinutes / 60) * parseFloat(currentRate))
       : null;
 
   const totalDisplay = formatDurationMinutes(totalMinutes, i18n.language);
@@ -208,7 +208,7 @@ export default function PayrollPage() {
               />
               {salary !== null && (
                 <Typography variant="body1" sx={{ mt: 2 }}>
-                  {totalDisplay} × ${parseFloat(currentRate).toFixed(2)}/hr ={' '}
+                  {totalDisplay} × ${parseFloat(currentRate)}/{t('hr')} ={' '}
                   <strong>${salary}</strong>
                 </Typography>
               )}

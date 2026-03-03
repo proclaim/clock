@@ -173,5 +173,10 @@
   "Failed to submit add request": "Failed to submit add request",
   "Pending Requests": "Pending Requests",
   "Type": "Type",
-  "Add": "Add"
+  "Add": "Add",
+  "Payroll": "Payroll",
+  "Salary Calculator": "Salary Calculator",
+  "Hourly Rate": "Hourly Rate",
+  "No active employees found.": "No active employees found.",
+  "hr": "hr"
 }
