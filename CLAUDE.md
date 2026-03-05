@@ -1,5 +1,14 @@
 # Clock Project - Claude Code Notes
 
+## Database Schema Changes
+
+**All schema changes MUST go through a migration file.** Never alter the production database directly.
+
+- Migration files live in `clock-backend/migrations/` and follow the naming pattern `YYYYMMDDHHMMSS-description.sql`
+- The backend runs `sql-migrate` on startup, which automatically applies any pending migrations
+- Use `IF NOT EXISTS` / `IF EXISTS` guards when adding/dropping columns or indexes so migrations are safe to re-run
+- After adding a new migration, apply it locally: extract the `-- +migrate Up` block and run it against `clock_postgres_dev`
+
 ## Production Server Access
 
 ```bash
