@@ -373,7 +373,7 @@ func (s *AdminAttendanceService) DeleteAttendanceRecord(recordID, adminID int) e
 // GetAllEmployees retrieves all active employees (for dropdowns)
 func (s *AdminAttendanceService) GetAllEmployees() ([]*models.Employee, error) {
 	query := `
-		SELECT id, username, name, email, phone, role, is_active, created_at, updated_at
+		SELECT id, username, name, email, phone, role, is_active, hourly_rate, created_at, updated_at
 		FROM employees
 		WHERE deleted_at IS NULL AND is_active = true
 		ORDER BY name ASC

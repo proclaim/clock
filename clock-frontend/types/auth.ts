@@ -8,6 +8,7 @@ export interface Employee {
   phone: string | null;
   role: EmployeeRole;
   is_active: boolean;
+  hourly_rate?: number | null;
 }
 
 export interface LoginRequest {

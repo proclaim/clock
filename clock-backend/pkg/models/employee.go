@@ -23,6 +23,7 @@ type Employee struct {
 	PasswordHash string         `db:"password_hash" json:"-"` // Never expose in JSON
 	Role         EmployeeRole   `db:"role" json:"role"`
 	IsActive     bool           `db:"is_active" json:"is_active"`
+	HourlyRate   sql.NullInt64  `db:"hourly_rate" json:"hourly_rate,omitempty"`
 	CreatedAt    time.Time      `db:"created_at" json:"created_at"`
 	UpdatedAt    time.Time      `db:"updated_at" json:"updated_at"`
 	DeletedAt    sql.NullTime   `db:"deleted_at" json:"-"`
@@ -30,13 +31,14 @@ type Employee struct {
 
 // EmployeeResponse represents employee data for API responses
 type EmployeeResponse struct {
-	ID       int          `json:"id"`
-	Username string       `json:"username"`
-	Name     string       `json:"name"`
-	Email    string       `json:"email,omitempty"`
-	Phone    string       `json:"phone,omitempty"`
-	Role     EmployeeRole `json:"role"`
-	IsActive bool         `json:"is_active"`
+	ID         int          `json:"id"`
+	Username   string       `json:"username"`
+	Name       string       `json:"name"`
+	Email      string       `json:"email,omitempty"`
+	Phone      string       `json:"phone,omitempty"`
+	Role       EmployeeRole `json:"role"`
+	IsActive   bool         `json:"is_active"`
+	HourlyRate *int64       `json:"hourly_rate,omitempty"`
 }
 
 // ToResponse converts Employee to EmployeeResponse
@@ -55,6 +57,10 @@ func (e *Employee) ToResponse() *EmployeeResponse {
 
 	if e.Phone.Valid {
 		resp.Phone = e.Phone.String
+	}
+
+	if e.HourlyRate.Valid {
+		resp.HourlyRate = &e.HourlyRate.Int64
 	}
 
 	return resp

@@ -32,7 +32,7 @@ func (s *AuthService) Login(username, password string) (*models.Employee, string
 	var employee models.Employee
 	query := `
 		SELECT id, username, name, email, phone, password_hash, role, is_active,
-		       created_at, updated_at, deleted_at
+		       hourly_rate, created_at, updated_at, deleted_at
 		FROM employees
 		WHERE LOWER(username) = LOWER($1) AND deleted_at IS NULL
 	`
@@ -120,7 +120,7 @@ func (s *AuthService) GetEmployeeByID(id int) (*models.Employee, error) {
 	var employee models.Employee
 	query := `
 		SELECT id, username, name, email, phone, password_hash, role, is_active,
-		       created_at, updated_at, deleted_at
+		       hourly_rate, created_at, updated_at, deleted_at
 		FROM employees
 		WHERE id = $1 AND deleted_at IS NULL
 	`
@@ -234,7 +234,7 @@ func (s *AuthService) CreateEmployee(username, name, password string, role model
 	query := `
 		INSERT INTO employees (username, name, password_hash, role, is_active)
 		VALUES ($1, $2, $3, $4, true)
-		RETURNING id, username, name, email, phone, role, is_active, created_at, updated_at
+		RETURNING id, username, name, email, phone, role, is_active, hourly_rate, created_at, updated_at
 	`
 
 	var employee models.Employee

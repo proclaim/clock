@@ -92,6 +92,20 @@ export default function PayrollPage() {
     loadEmployees();
   }, []);
 
+  // Auto-fill hourly rates from employee defaults
+  useEffect(() => {
+    if (employees.length === 0) return;
+    setHourlyRates((prev) => {
+      const updated = { ...prev };
+      for (const emp of employees) {
+        if (emp.hourly_rate != null && !(emp.id in updated)) {
+          updated[emp.id] = String(emp.hourly_rate);
+        }
+      }
+      return updated;
+    });
+  }, [employees]);
+
   const loadRecords = useCallback(async () => {
     if (employees.length === 0) return;
     const employee = employees[selectedTabIndex];
