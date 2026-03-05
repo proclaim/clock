@@ -30,7 +30,9 @@ func NewAttendanceService(db *database.Database, cfg *config.Config, logger *zap
 // CheckIn creates a new check-in record
 func (s *AttendanceService) CheckIn(employeeID int, note string) (*models.AttendanceRecord, *models.AttendanceRecord, error) {
 	now := time.Now()
-	today := now.Truncate(24 * time.Hour)
+	taipeiLoc, _ := time.LoadLocation("Asia/Taipei")
+	nowLocal := now.In(taipeiLoc)
+	today := time.Date(nowLocal.Year(), nowLocal.Month(), nowLocal.Day(), 0, 0, 0, 0, taipeiLoc)
 
 	// Check for active check-in
 	activeRecord, err := s.getActiveCheckIn(employeeID)
@@ -41,8 +43,9 @@ func (s *AttendanceService) CheckIn(employeeID int, note string) (*models.Attend
 	var autoClosedRecord *models.AttendanceRecord
 
 	if activeRecord != nil {
-		// Check if the active check-in is from today
-		activeCheckInDay := activeRecord.CheckInTime.Truncate(24 * time.Hour)
+		// Check if the active check-in is from today (in Taipei time)
+		activeCheckInLocal := activeRecord.CheckInTime.In(taipeiLoc)
+		activeCheckInDay := time.Date(activeCheckInLocal.Year(), activeCheckInLocal.Month(), activeCheckInLocal.Day(), 0, 0, 0, 0, taipeiLoc)
 
 		if activeCheckInDay.Equal(today) {
 			// Already checked in today
@@ -158,7 +161,8 @@ func (s *AttendanceService) GetRecords(employeeID int, year, month *int) ([]*mod
 
 	// Add year and month filters if provided
 	if year != nil && month != nil {
-		startDate := time.Date(*year, time.Month(*month), 1, 0, 0, 0, 0, time.UTC)
+		taipeiLoc, _ := time.LoadLocation("Asia/Taipei")
+		startDate := time.Date(*year, time.Month(*month), 1, 0, 0, 0, 0, taipeiLoc)
 		endDate := startDate.AddDate(0, 1, 0)
 
 		argCount++

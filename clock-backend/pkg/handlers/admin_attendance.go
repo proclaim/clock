@@ -19,16 +19,17 @@ func (h *Handler) GetAdminAttendanceSummary(ctx iris.Context) {
 	var startDate, endDate *time.Time
 	var employeeID *int
 
+	taipeiLoc, _ := time.LoadLocation("Asia/Taipei")
+
 	if startStr := ctx.URLParam("start_date"); startStr != "" {
-		if t, err := time.Parse("2006-01-02", startStr); err == nil {
+		if t, err := time.ParseInLocation("2006-01-02", startStr, taipeiLoc); err == nil {
 			startDate = &t
 		}
 	}
 
 	if endStr := ctx.URLParam("end_date"); endStr != "" {
-		if t, err := time.Parse("2006-01-02", endStr); err == nil {
-			// Add one day to make end date inclusive (filter uses <)
-			t = t.AddDate(0, 0, 1)
+		if t, err := time.ParseInLocation("2006-01-02", endStr, taipeiLoc); err == nil {
+			// Frontend sends the first day of the next month as the exclusive upper bound
 			endDate = &t
 		}
 	}
@@ -69,16 +70,17 @@ func (h *Handler) GetAdminAttendanceRecords(ctx iris.Context) {
 	page := 1
 	perPage := 50
 
+	taipeiLoc, _ := time.LoadLocation("Asia/Taipei")
+
 	if startStr := ctx.URLParam("start_date"); startStr != "" {
-		if t, err := time.Parse("2006-01-02", startStr); err == nil {
+		if t, err := time.ParseInLocation("2006-01-02", startStr, taipeiLoc); err == nil {
 			startDate = &t
 		}
 	}
 
 	if endStr := ctx.URLParam("end_date"); endStr != "" {
-		if t, err := time.Parse("2006-01-02", endStr); err == nil {
-			// Add one day to make end date inclusive (filter uses <)
-			t = t.AddDate(0, 0, 1)
+		if t, err := time.ParseInLocation("2006-01-02", endStr, taipeiLoc); err == nil {
+			// Frontend sends the first day of the next month as the exclusive upper bound
 			endDate = &t
 		}
 	}
