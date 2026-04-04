@@ -15,7 +15,7 @@ import {
   Stack,
 } from '@mui/material';
 import { LockReset, Group } from '@mui/icons-material';
-import { format, subDays } from 'date-fns';
+import { format, subDays, addDays, parseISO } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { adminService } from '@/services/adminService';
@@ -53,11 +53,14 @@ export default function AdminDashboardPage() {
     loadData();
   }, [startDate, endDate, selectedEmployeeId]);
 
+  // end_date sent to the API is exclusive, so add 1 day to make the UI selection inclusive
+  const exclusiveEndDate = endDate ? format(addDays(parseISO(endDate), 1), 'yyyy-MM-dd') : undefined;
+
   const loadData = async () => {
     setIsLoading(true);
     try {
       const [summaryData, employeeData] = await Promise.all([
-        adminService.getAttendanceSummary(startDate, endDate, selectedEmployeeId),
+        adminService.getAttendanceSummary(startDate, exclusiveEndDate, selectedEmployeeId),
         adminService.getAllEmployees(),
       ]);
 
@@ -185,7 +188,7 @@ export default function AdminDashboardPage() {
       <Box sx={{ mb: 4 }}>
         <AttendanceRecordsTable
           startDate={startDate}
-          endDate={endDate}
+          endDate={exclusiveEndDate}
           employeeId={selectedEmployeeId}
           employees={employees}
           onRecordUpdated={loadData}
