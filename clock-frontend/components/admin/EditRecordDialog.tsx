@@ -61,6 +61,11 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
   const handleSubmit = async () => {
     if (!record) return;
 
+    if (checkOutTime && checkInTime && checkOutTime <= checkInTime) {
+      setError(t('Check-out time must be later than check-in time'));
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
 
@@ -113,6 +118,7 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
               <DateTimePicker
                 label={t('Check-Out Time')}
                 value={checkOutTime}
+                minDateTime={checkInTime ?? undefined}
                 onChange={(newValue) => {
                   setCheckOutTime(newValue);
                   if (newValue && status === 'CHECKED_IN') {

@@ -57,6 +57,11 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
       return;
     }
 
+    if (checkOutTime && checkInTime && checkOutTime <= checkInTime) {
+      setError(t('Check-out time must be later than check-in time'));
+      return;
+    }
+
     if (!editReason.trim() || editReason.trim().length < 3) {
       setError(t('Reason is required (minimum 3 characters)'));
       return;
@@ -133,6 +138,7 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
               <DateTimePicker
                 label={t('Check-Out Time')}
                 value={checkOutTime}
+                minDateTime={checkInTime ?? undefined}
                 onChange={(newValue) => setCheckOutTime(newValue)}
                 slotProps={{
                   textField: {
