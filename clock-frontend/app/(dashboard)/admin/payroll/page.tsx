@@ -22,6 +22,7 @@ import { Employee } from '@/types/auth';
 import { AttendanceRecordWithEmployee } from '@/types/admin';
 import { MonthSelector } from '@/components/attendance/MonthSelector';
 import { PayrollTable } from '@/components/admin/PayrollTable';
+import { EditRecordDialog } from '@/components/admin/EditRecordDialog';
 import { formatDurationMinutes } from '@/utils/dateUtils';
 
 const getPreviousMonth = (): { year: number; month: number } => {
@@ -65,6 +66,8 @@ export default function PayrollPage() {
   const [selectedMonth, setSelectedMonth] = useState(() => getPreviousMonth().month);
   const [records, setRecords] = useState<AttendanceRecordWithEmployee[]>([]);
   const [hourlyRates, setHourlyRates] = useState<Record<number, string>>({});
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<AttendanceRecordWithEmployee | null>(null);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
   const [isLoadingRecords, setIsLoadingRecords] = useState(false);
   const totalMinutes = useMemo(() => calculateTotalMinutes(records), [records]);
@@ -190,7 +193,14 @@ export default function PayrollPage() {
               <CircularProgress />
             </Box>
           ) : (
-            <PayrollTable records={records} totalMinutes={totalMinutes} />
+            <PayrollTable
+              records={records}
+              totalMinutes={totalMinutes}
+              onEdit={(record) => {
+                setSelectedRecord(record);
+                setEditDialogOpen(true);
+              }}
+            />
           )}
 
           {currentEmployee && (
@@ -230,6 +240,19 @@ export default function PayrollPage() {
           )}
         </>
       )}
+      <EditRecordDialog
+        open={editDialogOpen}
+        record={selectedRecord}
+        onClose={() => {
+          setEditDialogOpen(false);
+          setSelectedRecord(null);
+        }}
+        onSaved={() => {
+          setEditDialogOpen(false);
+          setSelectedRecord(null);
+          loadRecords();
+        }}
+      />
     </Container>
   );
 }
