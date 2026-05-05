@@ -125,6 +125,7 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
                 label={t('Check-In Time')}
                 value={checkInTime}
                 onChange={(newValue) => setCheckInTime(newValue)}
+                timeSteps={{ minutes: 15 }}
                 slotProps={{
                   textField: {
                     fullWidth: true,
@@ -140,6 +141,7 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
                 value={checkOutTime}
                 minDateTime={checkInTime ?? undefined}
                 onChange={(newValue) => setCheckOutTime(newValue)}
+                timeSteps={{ minutes: 15 }}
                 slotProps={{
                   textField: {
                     fullWidth: true,

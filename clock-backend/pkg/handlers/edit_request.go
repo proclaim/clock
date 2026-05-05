@@ -58,6 +58,8 @@ func (h *Handler) SubmitEditRequest(ctx iris.Context) {
 			h.respondWithError(ctx, iris.StatusForbidden, "You can only edit your own records")
 		case customErrors.ErrEditRequestAlreadyPending:
 			h.respondWithError(ctx, iris.StatusConflict, err.Error())
+		case customErrors.ErrCheckOutBeforeCheckIn:
+			h.respondWithError(ctx, iris.StatusBadRequest, err.Error())
 		default:
 			h.logger.Error("Failed to submit edit request", zap.Error(err))
 			h.respondWithError(ctx, iris.StatusInternalServerError, "Internal server error")
@@ -98,6 +100,10 @@ func (h *Handler) SubmitAddRequest(ctx iris.Context) {
 		employeeID, checkInTime, checkOutTime, req.Note,
 	)
 	if err != nil {
+		if err == customErrors.ErrCheckOutBeforeCheckIn {
+			h.respondWithError(ctx, iris.StatusBadRequest, err.Error())
+			return
+		}
 		h.logger.Error("Failed to submit add request", zap.Error(err))
 		h.respondWithError(ctx, iris.StatusInternalServerError, "Internal server error")
 		return

@@ -183,12 +183,15 @@ func (h *Handler) UpdateAdminAttendanceRecord(ctx iris.Context) {
 	)
 
 	if err != nil {
-		if err == customErrors.ErrRecordNotFound {
+		switch err {
+		case customErrors.ErrRecordNotFound:
 			h.respondWithError(ctx, iris.StatusNotFound, "Record not found")
-			return
+		case customErrors.ErrCheckOutBeforeCheckIn:
+			h.respondWithError(ctx, iris.StatusBadRequest, err.Error())
+		default:
+			h.logger.Error("Failed to update attendance record", zap.Error(err), zap.Int("record_id", recordID))
+			h.respondWithError(ctx, iris.StatusInternalServerError, "Internal server error")
 		}
-		h.logger.Error("Failed to update attendance record", zap.Error(err), zap.Int("record_id", recordID))
-		h.respondWithError(ctx, iris.StatusInternalServerError, "Internal server error")
 		return
 	}
 
@@ -238,6 +241,10 @@ func (h *Handler) CreateAdminAttendanceRecord(ctx iris.Context) {
 	)
 
 	if err != nil {
+		if err == customErrors.ErrCheckOutBeforeCheckIn {
+			h.respondWithError(ctx, iris.StatusBadRequest, err.Error())
+			return
+		}
 		h.logger.Error("Failed to create attendance record", zap.Error(err))
 		h.respondWithError(ctx, iris.StatusInternalServerError, "Internal server error")
 		return

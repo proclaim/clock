@@ -35,10 +35,14 @@ func (s *EditRequestService) SubmitEditRequest(
 	checkInTime, checkOutTime *time.Time,
 	note string,
 ) (*models.EditRequest, error) {
-	// Verify the attendance record belongs to this employee
-	var recordEmployeeID int
-	err := s.db.Get(&recordEmployeeID,
-		"SELECT employee_id FROM attendance_records WHERE id = $1 AND deleted_at IS NULL",
+	// Verify the attendance record belongs to this employee and fetch times for validation
+	var existingRecord struct {
+		EmployeeID   int          `db:"employee_id"`
+		CheckInTime  time.Time    `db:"check_in_time"`
+		CheckOutTime sql.NullTime `db:"check_out_time"`
+	}
+	err := s.db.Get(&existingRecord,
+		"SELECT employee_id, check_in_time, check_out_time FROM attendance_records WHERE id = $1 AND deleted_at IS NULL",
 		attendanceRecordID,
 	)
 	if err == sql.ErrNoRows {
@@ -49,8 +53,24 @@ func (s *EditRequestService) SubmitEditRequest(
 		return nil, err
 	}
 
-	if recordEmployeeID != employeeID {
+	if existingRecord.EmployeeID != employeeID {
 		return nil, customErrors.ErrUnauthorized
+	}
+
+	// Validate time ordering to prevent negative work hours
+	effectiveCheckIn := existingRecord.CheckInTime
+	if checkInTime != nil {
+		effectiveCheckIn = *checkInTime
+	}
+	var effectiveCheckOut *time.Time
+	if checkOutTime != nil {
+		effectiveCheckOut = checkOutTime
+	} else if existingRecord.CheckOutTime.Valid {
+		t := existingRecord.CheckOutTime.Time
+		effectiveCheckOut = &t
+	}
+	if effectiveCheckOut != nil && !effectiveCheckOut.After(effectiveCheckIn) {
+		return nil, customErrors.ErrCheckOutBeforeCheckIn
 	}
 
 	// Check if there's already a pending edit request for this record
@@ -173,6 +193,10 @@ func (s *EditRequestService) SubmitAddRequest(
 	checkOutTime *time.Time,
 	note string,
 ) (*models.EditRequest, error) {
+	if checkOutTime != nil && !checkOutTime.After(checkInTime) {
+		return nil, customErrors.ErrCheckOutBeforeCheckIn
+	}
+
 	checkInTimeValue := sql.NullTime{Time: checkInTime, Valid: true}
 
 	var checkOutTimeValue sql.NullTime

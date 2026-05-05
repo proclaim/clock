@@ -188,6 +188,36 @@ func (s *AdminAttendanceService) UpdateAttendanceRecord(
 	adminID int,
 ) (*models.AttendanceRecord, error) {
 
+	// Fetch existing record to validate time ordering
+	var existing struct {
+		CheckInTime  time.Time    `db:"check_in_time"`
+		CheckOutTime sql.NullTime `db:"check_out_time"`
+	}
+	if err := s.db.Get(&existing,
+		"SELECT check_in_time, check_out_time FROM attendance_records WHERE id = $1 AND deleted_at IS NULL",
+		recordID,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, customErrors.ErrRecordNotFound
+		}
+		return nil, err
+	}
+
+	effectiveCheckIn := existing.CheckInTime
+	if checkInTime != nil {
+		effectiveCheckIn = *checkInTime
+	}
+	var effectiveCheckOut *time.Time
+	if checkOutTime != nil {
+		effectiveCheckOut = checkOutTime
+	} else if existing.CheckOutTime.Valid {
+		t := existing.CheckOutTime.Time
+		effectiveCheckOut = &t
+	}
+	if effectiveCheckOut != nil && !effectiveCheckOut.After(effectiveCheckIn) {
+		return nil, customErrors.ErrCheckOutBeforeCheckIn
+	}
+
 	// Build dynamic update query
 	updates := []string{"updated_at = NOW()", "edited_at = NOW()"}
 	args := []interface{}{}
@@ -290,6 +320,10 @@ func (s *AdminAttendanceService) CreateAttendanceRecord(
 	checkInNote, checkOutNote, editReason *string,
 	adminID int,
 ) (*models.AttendanceRecord, error) {
+
+	if checkOutTime != nil && !checkOutTime.After(checkInTime) {
+		return nil, customErrors.ErrCheckOutBeforeCheckIn
+	}
 
 	var checkInNoteValue, checkOutNoteValue, editReasonValue sql.NullString
 

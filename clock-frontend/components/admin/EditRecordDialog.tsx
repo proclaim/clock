@@ -105,6 +105,7 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
                 label={t('Check-In Time')}
                 value={checkInTime}
                 onChange={(newValue) => setCheckInTime(newValue)}
+                timeSteps={{ minutes: 15 }}
                 slotProps={{
                   textField: {
                     fullWidth: true,
@@ -127,6 +128,7 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
                     setStatus('CHECKED_IN');
                   }
                 }}
+                timeSteps={{ minutes: 15 }}
                 slotProps={{
                   textField: {
                     fullWidth: true,

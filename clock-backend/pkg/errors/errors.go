@@ -10,10 +10,11 @@ var (
 	ErrUnauthorized       = errors.New("unauthorized")
 
 	// Attendance errors
-	ErrAlreadyCheckedIn    = errors.New("you already have an active check-in today. Please check out first")
-	ErrNoActiveCheckIn     = errors.New("no active check-in found")
-	ErrAlreadyCheckedOut   = errors.New("already checked out")
-	ErrInvalidDateRange    = errors.New("invalid date range")
+	ErrAlreadyCheckedIn       = errors.New("you already have an active check-in today. Please check out first")
+	ErrNoActiveCheckIn        = errors.New("no active check-in found")
+	ErrAlreadyCheckedOut      = errors.New("already checked out")
+	ErrInvalidDateRange       = errors.New("invalid date range")
+	ErrCheckOutBeforeCheckIn  = errors.New("check-out time must be after check-in time")
 
 	// Employee errors
 	ErrEmployeeNotFound    = errors.New("employee not found")

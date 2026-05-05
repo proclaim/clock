@@ -95,6 +95,7 @@ export const AddRequestDialog: React.FC<AddRequestDialogProps> = ({
                 label={t('Check-In Time')}
                 value={checkInTime}
                 onChange={(newValue) => setCheckInTime(newValue)}
+                timeSteps={{ minutes: 15 }}
                 slotProps={{
                   textField: {
                     fullWidth: true,
@@ -109,6 +110,7 @@ export const AddRequestDialog: React.FC<AddRequestDialogProps> = ({
                 label={t('Check-Out Time')}
                 value={checkOutTime}
                 onChange={(newValue) => setCheckOutTime(newValue)}
+                timeSteps={{ minutes: 15 }}
                 slotProps={{
                   textField: {
                     fullWidth: true,
