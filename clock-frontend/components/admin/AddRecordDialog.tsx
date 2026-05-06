@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -24,6 +24,7 @@ import { AttendanceStatus } from '@/types/attendance';
 interface AddRecordDialogProps {
   open: boolean;
   employees: Employee[];
+  defaultEmployee?: Employee | null;
   onClose: () => void;
   onSaved: () => void;
 }
@@ -31,12 +32,13 @@ interface AddRecordDialogProps {
 export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
   open,
   employees,
+  defaultEmployee,
   onClose,
   onSaved,
 }) => {
   const { t } = useTranslation();
 
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(defaultEmployee ?? null);
   const [checkInTime, setCheckInTime] = useState<Date | null>(new Date());
   const [checkOutTime, setCheckOutTime] = useState<Date | null>(null);
   const [status, setStatus] = useState<AttendanceStatus>('CHECKED_OUT');
@@ -45,6 +47,12 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
   const [editReason, setEditReason] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setSelectedEmployee(defaultEmployee ?? null);
+    }
+  }, [open, defaultEmployee]);
 
   const handleSubmit = async () => {
     if (!selectedEmployee) {

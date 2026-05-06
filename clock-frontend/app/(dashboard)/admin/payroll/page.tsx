@@ -23,6 +23,7 @@ import { AttendanceRecordWithEmployee } from '@/types/admin';
 import { MonthSelector } from '@/components/attendance/MonthSelector';
 import { PayrollTable } from '@/components/admin/PayrollTable';
 import { EditRecordDialog } from '@/components/admin/EditRecordDialog';
+import { AddRecordDialog } from '@/components/admin/AddRecordDialog';
 import { formatDurationMinutes } from '@/utils/dateUtils';
 
 const getPreviousMonth = (): { year: number; month: number } => {
@@ -68,6 +69,7 @@ export default function PayrollPage() {
   const [hourlyRates, setHourlyRates] = useState<Record<number, string>>({});
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecordWithEmployee | null>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
   const [isLoadingRecords, setIsLoadingRecords] = useState(false);
   const totalMinutes = useMemo(() => calculateTotalMinutes(records), [records]);
@@ -188,6 +190,12 @@ export default function PayrollPage() {
             ))}
           </Tabs>
 
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+            <Button variant="contained" onClick={() => setAddDialogOpen(true)}>
+              {t('Add Record')}
+            </Button>
+          </Box>
+
           {isLoadingRecords ? (
             <Box display="flex" justifyContent="center" sx={{ py: 4 }}>
               <CircularProgress />
@@ -250,6 +258,16 @@ export default function PayrollPage() {
         onSaved={() => {
           setEditDialogOpen(false);
           setSelectedRecord(null);
+          loadRecords();
+        }}
+      />
+      <AddRecordDialog
+        open={addDialogOpen}
+        employees={employees}
+        defaultEmployee={currentEmployee ?? null}
+        onClose={() => setAddDialogOpen(false)}
+        onSaved={() => {
+          setAddDialogOpen(false);
           loadRecords();
         }}
       />
