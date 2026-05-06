@@ -17,6 +17,7 @@ import {
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { renderMultiSectionDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers';
 import { parseISO } from 'date-fns';
 import { adminService } from '@/services/adminService';
 import { AttendanceRecordWithEmployee } from '@/types/admin';
@@ -106,6 +107,11 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
                 value={checkInTime}
                 onChange={(newValue) => setCheckInTime(newValue)}
                 timeSteps={{ minutes: 15 }}
+                viewRenderers={{
+                  hours: renderMultiSectionDigitalClockTimeView as any,
+                  minutes: renderMultiSectionDigitalClockTimeView as any,
+                  meridiem: renderMultiSectionDigitalClockTimeView as any,
+                }}
                 slotProps={{
                   textField: {
                     fullWidth: true,
@@ -129,6 +135,11 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
                   }
                 }}
                 timeSteps={{ minutes: 15 }}
+                viewRenderers={{
+                  hours: renderMultiSectionDigitalClockTimeView as any,
+                  minutes: renderMultiSectionDigitalClockTimeView as any,
+                  meridiem: renderMultiSectionDigitalClockTimeView as any,
+                }}
                 slotProps={{
                   textField: {
                     fullWidth: true,
