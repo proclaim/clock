@@ -19,6 +19,22 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { renderMultiSectionDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers';
 import { parseISO } from 'date-fns';
+
+// MUI scrolls the selected meridiem item to center, hiding AM when PM is selected.
+// This resets the section to show AM (the first real item) at the top.
+const scrollMeridiemToTop = () => {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const sections = document.querySelectorAll('.MuiMultiSectionDigitalClockSection-root');
+      if (sections.length === 0) return;
+      const section = sections[sections.length - 1] as HTMLElement;
+      const firstRealItem = Array.from(section.querySelectorAll('li')).find(
+        (li) => li.textContent?.trim(),
+      ) as HTMLElement | undefined;
+      if (firstRealItem) section.scrollTop = firstRealItem.offsetTop;
+    });
+  });
+};
 import { adminService } from '@/services/adminService';
 import { AttendanceRecordWithEmployee } from '@/types/admin';
 import { AttendanceStatus } from '@/types/attendance';
@@ -112,10 +128,20 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
                   minutes: renderMultiSectionDigitalClockTimeView as any,
                   meridiem: renderMultiSectionDigitalClockTimeView as any,
                 }}
+                onOpen={() => setTimeout(scrollMeridiemToTop, 150)}
+                onViewChange={(view) => {
+                  if (view !== 'day' && view !== 'month' && view !== 'year') {
+                    scrollMeridiemToTop();
+                  }
+                }}
                 slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    required: true,
+                  textField: { fullWidth: true, required: true },
+                  popper: {
+                    sx: {
+                      '.MuiMultiSectionDigitalClockSection-root:last-of-type': {
+                        overflow: 'hidden',
+                      },
+                    },
                   },
                 }}
               />
@@ -140,9 +166,20 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
                   minutes: renderMultiSectionDigitalClockTimeView as any,
                   meridiem: renderMultiSectionDigitalClockTimeView as any,
                 }}
+                onOpen={() => setTimeout(scrollMeridiemToTop, 150)}
+                onViewChange={(view) => {
+                  if (view !== 'day' && view !== 'month' && view !== 'year') {
+                    scrollMeridiemToTop();
+                  }
+                }}
                 slotProps={{
-                  textField: {
-                    fullWidth: true,
+                  textField: { fullWidth: true },
+                  popper: {
+                    sx: {
+                      '.MuiMultiSectionDigitalClockSection-root:last-of-type': {
+                        overflow: 'hidden',
+                      },
+                    },
                   },
                 }}
               />
