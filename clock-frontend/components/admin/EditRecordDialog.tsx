@@ -18,7 +18,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { renderMultiSectionDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers';
-import { parseISO } from 'date-fns';
+import { parseISO, startOfDay, isBefore } from 'date-fns';
 
 // MUI scrolls the selected meridiem item to center, hiding AM when PM is selected.
 // This resets the section to show AM (the first real item) at the top.
@@ -78,8 +78,8 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
   const handleSubmit = async () => {
     if (!record) return;
 
-    if (checkOutTime && checkInTime && checkOutTime <= checkInTime) {
-      setError(t('Check-out time must be later than check-in time'));
+    if (checkOutTime && checkInTime && isBefore(startOfDay(checkOutTime), startOfDay(checkInTime))) {
+      setError(t('Check-out date cannot be before check-in date'));
       return;
     }
 
@@ -151,7 +151,7 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
               <DateTimePicker
                 label={t('Check-Out Time')}
                 value={checkOutTime}
-                minDateTime={checkInTime ?? undefined}
+                minDateTime={checkInTime ? startOfDay(checkInTime) : undefined}
                 onChange={(newValue) => {
                   setCheckOutTime(newValue);
                   if (newValue && status === 'CHECKED_IN') {

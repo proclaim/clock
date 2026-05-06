@@ -18,6 +18,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { renderMultiSectionDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers';
+import { startOfDay, isBefore } from 'date-fns';
 import { adminService } from '@/services/adminService';
 
 const scrollMeridiemToTop = () => {
@@ -80,8 +81,8 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
       return;
     }
 
-    if (checkOutTime && checkInTime && checkOutTime <= checkInTime) {
-      setError(t('Check-out time must be later than check-in time'));
+    if (checkOutTime && checkInTime && isBefore(startOfDay(checkOutTime), startOfDay(checkInTime))) {
+      setError(t('Check-out date cannot be before check-in date'));
       return;
     }
 
@@ -177,7 +178,7 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
               <DateTimePicker
                 label={t('Check-Out Time')}
                 value={checkOutTime}
-                minDateTime={checkInTime ?? undefined}
+                minDateTime={checkInTime ? startOfDay(checkInTime) : undefined}
                 onChange={(newValue) => setCheckOutTime(newValue)}
                 timeSteps={{ minutes: 15 }}
                 viewRenderers={{
