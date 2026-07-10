@@ -178,5 +178,13 @@
   "Salary Calculator": "Salary Calculator",
   "Hourly Rate": "Hourly Rate",
   "No active employees found.": "No active employees found.",
-  "hr": "hr"
+  "hr": "hr",
+  "Confirm Check In": "Confirm Check In",
+  "Confirm Check Out": "Confirm Check Out",
+  "You usually clock in at {{time}}": "You usually clock in at {{time}}",
+  "You usually clock out at {{time}}": "You usually clock out at {{time}}",
+  "Usual time ({{time}})": "Usual time ({{time}})",
+  "Now ({{time}})": "Now ({{time}})",
+  "Pick a different time": "Pick a different time",
+  "Please pick a time": "Please pick a time"
 }

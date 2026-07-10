@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { Logout } from '@mui/icons-material';
 import { attendanceService } from '@/services/attendanceService';
+import { ClockActionDialog } from './ClockActionDialog';
 
 interface CheckOutButtonProps {
   disabled: boolean;
@@ -13,17 +14,18 @@ interface CheckOutButtonProps {
 
 export const CheckOutButton: React.FC<CheckOutButtonProps> = ({ disabled, onSuccess }) => {
   const { t } = useTranslation();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
 
-  const handleCheckOut = async () => {
+  const handleCheckOut = async (chosenTime: Date | null) => {
     setIsLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      await attendanceService.checkOut();
+      await attendanceService.checkOut(undefined, chosenTime?.toISOString());
       setSuccess(t('Checked out successfully!'));
       onSuccess();
     } catch (err) {
@@ -40,12 +42,19 @@ export const CheckOutButton: React.FC<CheckOutButtonProps> = ({ disabled, onSucc
         color="error"
         size="large"
         startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <Logout />}
-        onClick={handleCheckOut}
+        onClick={() => setIsDialogOpen(true)}
         disabled={disabled || isLoading}
         sx={{ minWidth: { xs: 'auto', sm: 150 }, width: { xs: '100%', sm: 'auto' } }}
       >
         {isLoading ? t('Checking Out...') : t('Check Out')}
       </Button>
+
+      <ClockActionDialog
+        open={isDialogOpen}
+        action="check_out"
+        onClose={() => setIsDialogOpen(false)}
+        onConfirm={handleCheckOut}
+      />
 
       <Snackbar
         open={!!success}

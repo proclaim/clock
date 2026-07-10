@@ -178,5 +178,13 @@
   "Salary Calculator": "薪資試算",
   "Hourly Rate": "時薪",
   "No active employees found.": "找不到在職員工。",
-  "hr": "時"
+  "hr": "時",
+  "Confirm Check In": "確認簽到",
+  "Confirm Check Out": "確認簽退",
+  "You usually clock in at {{time}}": "您通常在 {{time}} 簽到",
+  "You usually clock out at {{time}}": "您通常在 {{time}} 簽退",
+  "Usual time ({{time}})": "平常時間（{{time}}）",
+  "Now ({{time}})": "現在（{{time}}）",
+  "Pick a different time": "選擇其他時間",
+  "Please pick a time": "請選擇時間"
 }

@@ -44,6 +44,7 @@ func Setup(app *iris.Application, handler *handlers.Handler, cfg *config.Config,
 				attendance.Post("/check-out", handler.CheckOut)
 				attendance.Get("/status", handler.GetStatus)
 				attendance.Get("/records", handler.GetRecords)
+				attendance.Get("/suggested-time", handler.GetSuggestedTime)
 
 				// Edit requests (employee self-edit)
 				attendance.Post("/edit-requests", handler.SubmitEditRequest)

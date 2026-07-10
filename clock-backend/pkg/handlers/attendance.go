@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"errors"
+	"io"
 	"strconv"
+	"time"
 
 	"github.com/kataras/iris/v12"
 	"go.uber.org/zap"
@@ -12,6 +15,19 @@ import (
 	"github.com/jim/clock-backend/pkg/reqres"
 )
 
+// parseChosenTime parses an optional RFC3339 chosen clock time from a request
+// payload. Returns nil when the field is empty.
+func parseChosenTime(value string) (*time.Time, error) {
+	if value == "" {
+		return nil, nil
+	}
+	t, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
+
 // CheckIn handles check-in requests
 func (h *Handler) CheckIn(ctx iris.Context) {
 	employeeID := middleware.GetEmployeeID(ctx)
@@ -19,14 +35,25 @@ func (h *Handler) CheckIn(ctx iris.Context) {
 	var req reqres.CheckInRequest
 
 	if err := ctx.ReadJSON(&req); err != nil {
-		// Allow empty body
+		// Allow empty body, but reject malformed JSON so a bad chosen time is
+		// not silently recorded as "now"
+		if !errors.Is(err, io.EOF) {
+			h.respondWithError(ctx, iris.StatusBadRequest, "invalid request body")
+			return
+		}
 		req = reqres.CheckInRequest{}
 	}
 
-	// Perform check-in
-	newRecord, autoClosedRecord, err := h.attendanceService.CheckIn(employeeID, req.Note)
+	chosenTime, err := parseChosenTime(req.CheckInTime)
 	if err != nil {
-		if err == customErrors.ErrAlreadyCheckedIn {
+		h.respondWithError(ctx, iris.StatusBadRequest, "check_in_time must be a valid RFC3339 timestamp")
+		return
+	}
+
+	// Perform check-in
+	newRecord, autoClosedRecord, err := h.attendanceService.CheckIn(employeeID, req.Note, chosenTime)
+	if err != nil {
+		if err == customErrors.ErrAlreadyCheckedIn || err == customErrors.ErrChosenTimeNotToday {
 			h.respondWithError(ctx, iris.StatusBadRequest, err.Error())
 			return
 		}
@@ -62,14 +89,25 @@ func (h *Handler) CheckOut(ctx iris.Context) {
 	var req reqres.CheckOutRequest
 
 	if err := ctx.ReadJSON(&req); err != nil {
-		// Allow empty body
+		// Allow empty body, but reject malformed JSON so a bad chosen time is
+		// not silently recorded as "now"
+		if !errors.Is(err, io.EOF) {
+			h.respondWithError(ctx, iris.StatusBadRequest, "invalid request body")
+			return
+		}
 		req = reqres.CheckOutRequest{}
 	}
 
-	// Perform check-out
-	record, err := h.attendanceService.CheckOut(employeeID, req.Note)
+	chosenTime, err := parseChosenTime(req.CheckOutTime)
 	if err != nil {
-		if err == customErrors.ErrNoActiveCheckIn {
+		h.respondWithError(ctx, iris.StatusBadRequest, "check_out_time must be a valid RFC3339 timestamp")
+		return
+	}
+
+	// Perform check-out
+	record, err := h.attendanceService.CheckOut(employeeID, req.Note, chosenTime)
+	if err != nil {
+		if err == customErrors.ErrNoActiveCheckIn || err == customErrors.ErrChosenTimeNotToday || err == customErrors.ErrCheckOutBeforeCheckIn {
 			h.respondWithError(ctx, iris.StatusBadRequest, err.Error())
 			return
 		}
@@ -120,6 +158,36 @@ func (h *Handler) GetStatus(ctx iris.Context) {
 
 	if isCheckedIn && record != nil {
 		response.CurrentRecord = record.ToResponse()
+	}
+
+	h.respondWithJSON(ctx, iris.StatusOK, response)
+}
+
+// GetSuggestedTime handles requests for the usual clock time suggestion
+func (h *Handler) GetSuggestedTime(ctx iris.Context) {
+	employeeID := middleware.GetEmployeeID(ctx)
+
+	action := ctx.URLParam("action")
+	if action != "check_in" && action != "check_out" {
+		h.respondWithError(ctx, iris.StatusBadRequest, "action must be 'check_in' or 'check_out'")
+		return
+	}
+
+	suggested, sampleCount, err := h.attendanceService.GetSuggestedTime(employeeID, action)
+	if err != nil {
+		h.logger.Error("Get suggested time error", zap.Error(err), zap.Int("employee_id", employeeID))
+		h.respondWithError(ctx, iris.StatusInternalServerError, "Internal server error")
+		return
+	}
+
+	response := reqres.SuggestedTimeResponse{
+		Action:        action,
+		HasSuggestion: suggested != nil,
+		SampleCount:   sampleCount,
+	}
+
+	if suggested != nil {
+		response.SuggestedTime = suggested.Format("2006-01-02T15:04:05Z07:00")
 	}
 
 	h.respondWithJSON(ctx, iris.StatusOK, response)

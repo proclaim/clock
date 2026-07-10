@@ -5,11 +5,19 @@ import "github.com/jim/clock-backend/pkg/models"
 // CheckInRequest represents the check-in request payload
 type CheckInRequest struct {
 	Note string `json:"note"`
+	// CheckInTime is an optional RFC3339 chosen time to record as the official
+	// check-in time. Must be on today's date; the actual press time is always
+	// recorded server-side for audit.
+	CheckInTime string `json:"check_in_time,omitempty"`
 }
 
 // CheckOutRequest represents the check-out request payload
 type CheckOutRequest struct {
 	Note string `json:"note"`
+	// CheckOutTime is an optional RFC3339 chosen time to record as the official
+	// check-out time. Must be on today's date and after the check-in time; the
+	// actual press time is always recorded server-side for audit.
+	CheckOutTime string `json:"check_out_time,omitempty"`
 }
 
 // CheckInResponse represents the check-in response
@@ -44,6 +52,15 @@ type AttendanceStatusResponse struct {
 type AttendanceRecordsResponse struct {
 	Records []*models.AttendanceRecordResponse `json:"records"`
 	Total   int                                `json:"total"`
+}
+
+// SuggestedTimeResponse represents the usual clock time suggestion derived
+// from the employee's attendance history
+type SuggestedTimeResponse struct {
+	Action        string `json:"action"`
+	HasSuggestion bool   `json:"has_suggestion"`
+	SuggestedTime string `json:"suggested_time,omitempty"`
+	SampleCount   int    `json:"sample_count"`
 }
 
 // ErrorResponse represents an error response

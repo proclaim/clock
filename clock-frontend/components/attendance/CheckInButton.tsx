@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { Login } from '@mui/icons-material';
 import { attendanceService } from '@/services/attendanceService';
+import { ClockActionDialog } from './ClockActionDialog';
 
 interface CheckInButtonProps {
   disabled: boolean;
@@ -13,17 +14,18 @@ interface CheckInButtonProps {
 
 export const CheckInButton: React.FC<CheckInButtonProps> = ({ disabled, onSuccess }) => {
   const { t } = useTranslation();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
 
-  const handleCheckIn = async () => {
+  const handleCheckIn = async (chosenTime: Date | null) => {
     setIsLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      const result = await attendanceService.checkIn();
+      const result = await attendanceService.checkIn(undefined, chosenTime?.toISOString());
       if (result.previous_record_auto_closed) {
         setSuccess(
           t('Auto-closed previous check-in message', {
@@ -48,12 +50,19 @@ export const CheckInButton: React.FC<CheckInButtonProps> = ({ disabled, onSucces
         color="success"
         size="large"
         startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <Login />}
-        onClick={handleCheckIn}
+        onClick={() => setIsDialogOpen(true)}
         disabled={disabled || isLoading}
         sx={{ minWidth: { xs: 'auto', sm: 150 }, width: { xs: '100%', sm: 'auto' } }}
       >
         {isLoading ? t('Checking In...') : t('Check In')}
       </Button>
+
+      <ClockActionDialog
+        open={isDialogOpen}
+        action="check_in"
+        onClose={() => setIsDialogOpen(false)}
+        onConfirm={handleCheckIn}
+      />
 
       <Snackbar
         open={!!success}

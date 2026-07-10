@@ -4,6 +4,8 @@ import {
   CheckInResponse,
   CheckOutRequest,
   CheckOutResponse,
+  ClockAction,
+  SuggestedTimeResponse,
   AttendanceStatusResponse,
   AttendanceRecordsResponse,
   SubmitEditRequestPayload,
@@ -13,11 +15,12 @@ import {
 } from '@/types/attendance';
 
 class AttendanceService {
-  async checkIn(note?: string): Promise<CheckInResponse> {
+  async checkIn(note?: string, checkInTime?: string): Promise<CheckInResponse> {
     try {
-      const response = await api.post<CheckInResponse>('/attendance/check-in', {
-        note: note || '',
-      });
+      const payload: CheckInRequest = { note: note || '' };
+      if (checkInTime) payload.check_in_time = checkInTime;
+
+      const response = await api.post<CheckInResponse>('/attendance/check-in', payload);
 
       return response.data;
     } catch (error: any) {
@@ -28,11 +31,12 @@ class AttendanceService {
     }
   }
 
-  async checkOut(note?: string): Promise<CheckOutResponse> {
+  async checkOut(note?: string, checkOutTime?: string): Promise<CheckOutResponse> {
     try {
-      const response = await api.post<CheckOutResponse>('/attendance/check-out', {
-        note: note || '',
-      });
+      const payload: CheckOutRequest = { note: note || '' };
+      if (checkOutTime) payload.check_out_time = checkOutTime;
+
+      const response = await api.post<CheckOutResponse>('/attendance/check-out', payload);
 
       return response.data;
     } catch (error: any) {
@@ -40,6 +44,21 @@ class AttendanceService {
         throw new Error(error.response.data.error);
       }
       throw new Error('Check-out failed. Please try again.');
+    }
+  }
+
+  async getSuggestedTime(action: ClockAction): Promise<SuggestedTimeResponse> {
+    try {
+      const response = await api.get<SuggestedTimeResponse>('/attendance/suggested-time', {
+        params: { action },
+      });
+
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error('Failed to get suggested time');
     }
   }
 

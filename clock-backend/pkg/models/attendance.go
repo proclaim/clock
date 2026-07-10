@@ -16,30 +16,34 @@ const (
 
 // AttendanceRecord represents a check-in/check-out record
 type AttendanceRecord struct {
-	ID            int              `db:"id" json:"id"`
-	EmployeeID    int              `db:"employee_id" json:"employee_id"`
-	CheckInTime   time.Time        `db:"check_in_time" json:"check_in_time"`
-	CheckOutTime  sql.NullTime     `db:"check_out_time" json:"check_out_time,omitempty"`
-	Status        AttendanceStatus `db:"status" json:"status"`
-	CheckInNote   sql.NullString   `db:"check_in_note" json:"check_in_note,omitempty"`
-	CheckOutNote  sql.NullString   `db:"check_out_note" json:"check_out_note,omitempty"`
-	CreatedAt     time.Time        `db:"created_at" json:"created_at"`
-	UpdatedAt     time.Time        `db:"updated_at" json:"updated_at"`
-	DeletedAt     sql.NullTime     `db:"deleted_at" json:"-"`
-	EditedBy      sql.NullInt64    `db:"edited_by" json:"edited_by,omitempty"`
-	EditedAt      sql.NullTime     `db:"edited_at" json:"edited_at,omitempty"`
-	EditReason    sql.NullString   `db:"edit_reason" json:"edit_reason,omitempty"`
+	ID                 int              `db:"id" json:"id"`
+	EmployeeID         int              `db:"employee_id" json:"employee_id"`
+	CheckInTime        time.Time        `db:"check_in_time" json:"check_in_time"`
+	CheckOutTime       sql.NullTime     `db:"check_out_time" json:"check_out_time,omitempty"`
+	ActualCheckInTime  sql.NullTime     `db:"actual_check_in_time" json:"actual_check_in_time,omitempty"`
+	ActualCheckOutTime sql.NullTime     `db:"actual_check_out_time" json:"actual_check_out_time,omitempty"`
+	Status             AttendanceStatus `db:"status" json:"status"`
+	CheckInNote        sql.NullString   `db:"check_in_note" json:"check_in_note,omitempty"`
+	CheckOutNote       sql.NullString   `db:"check_out_note" json:"check_out_note,omitempty"`
+	CreatedAt          time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt          time.Time        `db:"updated_at" json:"updated_at"`
+	DeletedAt          sql.NullTime     `db:"deleted_at" json:"-"`
+	EditedBy           sql.NullInt64    `db:"edited_by" json:"edited_by,omitempty"`
+	EditedAt           sql.NullTime     `db:"edited_at" json:"edited_at,omitempty"`
+	EditReason         sql.NullString   `db:"edit_reason" json:"edit_reason,omitempty"`
 }
 
 // AttendanceRecordResponse represents attendance record data for API responses
 type AttendanceRecordResponse struct {
-	ID           int              `json:"id"`
-	EmployeeID   int              `json:"employee_id"`
-	CheckInTime  time.Time        `json:"check_in_time"`
-	CheckOutTime *time.Time       `json:"check_out_time,omitempty"`
-	Status       AttendanceStatus `json:"status"`
-	CheckInNote  string           `json:"check_in_note,omitempty"`
-	CheckOutNote string           `json:"check_out_note,omitempty"`
+	ID                 int              `json:"id"`
+	EmployeeID         int              `json:"employee_id"`
+	CheckInTime        time.Time        `json:"check_in_time"`
+	CheckOutTime       *time.Time       `json:"check_out_time,omitempty"`
+	ActualCheckInTime  *time.Time       `json:"actual_check_in_time,omitempty"`
+	ActualCheckOutTime *time.Time       `json:"actual_check_out_time,omitempty"`
+	Status             AttendanceStatus `json:"status"`
+	CheckInNote        string           `json:"check_in_note,omitempty"`
+	CheckOutNote       string           `json:"check_out_note,omitempty"`
 }
 
 // ToResponse converts AttendanceRecord to AttendanceRecordResponse
@@ -55,6 +59,14 @@ func (a *AttendanceRecord) ToResponse() *AttendanceRecordResponse {
 		resp.CheckOutTime = &a.CheckOutTime.Time
 	}
 
+	if a.ActualCheckInTime.Valid {
+		resp.ActualCheckInTime = &a.ActualCheckInTime.Time
+	}
+
+	if a.ActualCheckOutTime.Valid {
+		resp.ActualCheckOutTime = &a.ActualCheckOutTime.Time
+	}
+
 	if a.CheckInNote.Valid {
 		resp.CheckInNote = a.CheckInNote.String
 	}
@@ -68,10 +80,12 @@ func (a *AttendanceRecord) ToResponse() *AttendanceRecordResponse {
 
 // AttendanceRecordWithEmployee includes employee information
 type AttendanceRecordWithEmployee struct {
-	ID               int              `db:"id" json:"id"`
-	EmployeeID       int              `db:"employee_id" json:"employee_id"`
-	CheckInTime      time.Time        `db:"check_in_time" json:"check_in_time"`
-	CheckOutTime     sql.NullTime     `db:"check_out_time" json:"check_out_time"`
+	ID                 int              `db:"id" json:"id"`
+	EmployeeID         int              `db:"employee_id" json:"employee_id"`
+	CheckInTime        time.Time        `db:"check_in_time" json:"check_in_time"`
+	CheckOutTime       sql.NullTime     `db:"check_out_time" json:"check_out_time"`
+	ActualCheckInTime  sql.NullTime     `db:"actual_check_in_time" json:"actual_check_in_time"`
+	ActualCheckOutTime sql.NullTime     `db:"actual_check_out_time" json:"actual_check_out_time"`
 	Status           AttendanceStatus `db:"status" json:"status"`
 	CheckInNote      sql.NullString   `db:"check_in_note" json:"check_in_note"`
 	CheckOutNote     sql.NullString   `db:"check_out_note" json:"check_out_note"`
@@ -86,10 +100,12 @@ type AttendanceRecordWithEmployee struct {
 
 // AttendanceRecordWithEmployeeResponse for API responses
 type AttendanceRecordWithEmployeeResponse struct {
-	ID               int              `json:"id"`
-	EmployeeID       int              `json:"employee_id"`
-	CheckInTime      time.Time        `json:"check_in_time"`
-	CheckOutTime     *time.Time       `json:"check_out_time,omitempty"`
+	ID                 int              `json:"id"`
+	EmployeeID         int              `json:"employee_id"`
+	CheckInTime        time.Time        `json:"check_in_time"`
+	CheckOutTime       *time.Time       `json:"check_out_time,omitempty"`
+	ActualCheckInTime  *time.Time       `json:"actual_check_in_time,omitempty"`
+	ActualCheckOutTime *time.Time       `json:"actual_check_out_time,omitempty"`
 	Status           AttendanceStatus `json:"status"`
 	CheckInNote      string           `json:"check_in_note,omitempty"`
 	CheckOutNote     string           `json:"check_out_note,omitempty"`
@@ -117,6 +133,14 @@ func (a *AttendanceRecordWithEmployee) ToResponse() *AttendanceRecordWithEmploye
 
 	if a.CheckOutTime.Valid {
 		resp.CheckOutTime = &a.CheckOutTime.Time
+	}
+
+	if a.ActualCheckInTime.Valid {
+		resp.ActualCheckInTime = &a.ActualCheckInTime.Time
+	}
+
+	if a.ActualCheckOutTime.Valid {
+		resp.ActualCheckOutTime = &a.ActualCheckOutTime.Time
 	}
 
 	if a.CheckInNote.Valid {

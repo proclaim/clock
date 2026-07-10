@@ -110,6 +110,7 @@ func (s *AdminAttendanceService) GetAllAttendanceRecords(
 	query := `
 		SELECT
 			ar.id, ar.employee_id, ar.check_in_time, ar.check_out_time,
+			ar.actual_check_in_time, ar.actual_check_out_time,
 			ar.status, ar.check_in_note, ar.check_out_note,
 			ar.created_at, ar.updated_at, ar.edited_by, ar.edited_at, ar.edit_reason,
 			e.name as employee_name, e.username as employee_username

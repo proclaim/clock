@@ -5,6 +5,8 @@ export interface AttendanceRecord {
   employee_id: number;
   check_in_time: string;
   check_out_time: string | null;
+  actual_check_in_time?: string | null;
+  actual_check_out_time?: string | null;
   status: AttendanceStatus;
   check_in_note: string | null;
   check_out_note: string | null;
@@ -12,6 +14,9 @@ export interface AttendanceRecord {
 
 export interface CheckInRequest {
   note?: string;
+  // Optional chosen time (RFC3339) recorded as the official check-in time;
+  // must be on today's date. The actual press time is stored server-side.
+  check_in_time?: string;
 }
 
 export interface CheckInResponse {
@@ -30,9 +35,22 @@ export interface CheckInResponse {
 
 export interface CheckOutRequest {
   note?: string;
+  // Optional chosen time (RFC3339) recorded as the official check-out time;
+  // must be on today's date and after check-in. The actual press time is
+  // stored server-side.
+  check_out_time?: string;
 }
 
 export interface CheckOutResponse extends AttendanceRecord {}
+
+export type ClockAction = 'check_in' | 'check_out';
+
+export interface SuggestedTimeResponse {
+  action: ClockAction;
+  has_suggestion: boolean;
+  suggested_time?: string;
+  sample_count: number;
+}
 
 export interface AttendanceStatusResponse {
   is_checked_in: boolean;

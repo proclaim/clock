@@ -20,20 +20,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { renderMultiSectionDigitalClockTimeView } from '@mui/x-date-pickers/timeViewRenderers';
 import { startOfDay, isBefore } from 'date-fns';
 import { adminService } from '@/services/adminService';
-
-const scrollMeridiemToTop = () => {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      const sections = document.querySelectorAll('.MuiMultiSectionDigitalClockSection-root');
-      if (sections.length === 0) return;
-      const section = sections[sections.length - 1] as HTMLElement;
-      const firstRealItem = Array.from(section.querySelectorAll('li')).find(
-        (li) => li.textContent?.trim(),
-      ) as HTMLElement | undefined;
-      if (firstRealItem) section.scrollTop = firstRealItem.offsetTop;
-    });
-  });
-};
+import { scrollMeridiemToTop } from '@/utils/timePicker';
 import { Employee } from '@/types/auth';
 import { AttendanceStatus } from '@/types/attendance';
 

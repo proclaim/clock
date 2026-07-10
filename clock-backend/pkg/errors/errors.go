@@ -15,6 +15,7 @@ var (
 	ErrAlreadyCheckedOut      = errors.New("already checked out")
 	ErrInvalidDateRange       = errors.New("invalid date range")
 	ErrCheckOutBeforeCheckIn  = errors.New("check-out time must be after check-in time")
+	ErrChosenTimeNotToday     = errors.New("chosen time must be on today's date")
 
 	// Employee errors
 	ErrEmployeeNotFound    = errors.New("employee not found")
