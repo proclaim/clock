@@ -19,7 +19,7 @@ import {
   useTheme,
   alpha,
 } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Edit, Delete } from '@mui/icons-material';
 import { AttendanceRecordWithEmployee } from '@/types/admin';
 import { formatDate, formatTime, calculateDuration, formatDurationMinutes } from '@/utils/dateUtils';
 
@@ -27,6 +27,7 @@ interface PayrollTableProps {
   records: AttendanceRecordWithEmployee[];
   totalMinutes: number;
   onEdit?: (record: AttendanceRecordWithEmployee) => void;
+  onDelete?: (record: AttendanceRecordWithEmployee) => void;
 }
 
 const BOX_SHADOW = 'rgb(145 158 171 / 30%) 0px 0px 2px 0px, rgb(145 158 171 / 12%) 0px 12px 24px -4px';
@@ -37,7 +38,7 @@ const isMissingCheckOut = (record: AttendanceRecordWithEmployee): boolean => {
   return checkInDate.toDateString() !== new Date().toDateString();
 };
 
-export const PayrollTable: React.FC<PayrollTableProps> = ({ records, totalMinutes, onEdit }) => {
+export const PayrollTable: React.FC<PayrollTableProps> = ({ records, totalMinutes, onEdit, onDelete }) => {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -87,13 +88,22 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({ records, totalMinute
                 {' • '}
                 {calculateDuration(record.check_in_time, record.check_out_time as any, i18n.language)}
               </Typography>
-              {onEdit && (
+              {(onEdit || onDelete) && (
                 <Box sx={{ mt: 1 }}>
-                  <Tooltip title={t('Edit')}>
-                    <IconButton size="small" onClick={() => onEdit(record)}>
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
+                  {onEdit && (
+                    <Tooltip title={t('Edit')}>
+                      <IconButton size="small" onClick={() => onEdit(record)}>
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {onDelete && (
+                    <Tooltip title={t('Delete')}>
+                      <IconButton size="small" color="error" onClick={() => onDelete(record)}>
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </Box>
               )}
             </Paper>
@@ -132,7 +142,7 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({ records, totalMinute
             <TableCell sx={{ fontWeight: 600 }}>{t('Check-In Time')}</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>{t('Check-Out Time')}</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>{t('Duration')}</TableCell>
-            {onEdit && <TableCell />}
+            {(onEdit || onDelete) && <TableCell />}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -181,13 +191,22 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({ records, totalMinute
                     )}
                   </Typography>
                 </TableCell>
-                {onEdit && (
+                {(onEdit || onDelete) && (
                   <TableCell align="right">
-                    <Tooltip title={t('Edit')}>
-                      <IconButton size="small" onClick={() => onEdit(record)}>
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    {onEdit && (
+                      <Tooltip title={t('Edit')}>
+                        <IconButton size="small" onClick={() => onEdit(record)}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {onDelete && (
+                      <Tooltip title={t('Delete')}>
+                        <IconButton size="small" color="error" onClick={() => onDelete(record)}>
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </TableCell>
                 )}
               </TableRow>
@@ -204,7 +223,7 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({ records, totalMinute
                 {totalDisplay}
               </Typography>
             </TableCell>
-            {onEdit && <TableCell />}
+            {(onEdit || onDelete) && <TableCell />}
           </TableRow>
         </TableBody>
       </Table>

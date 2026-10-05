@@ -23,6 +23,7 @@ import { AttendanceRecordWithEmployee } from '@/types/admin';
 import { MonthSelector } from '@/components/attendance/MonthSelector';
 import { PayrollTable } from '@/components/admin/PayrollTable';
 import { EditRecordDialog } from '@/components/admin/EditRecordDialog';
+import { DeleteConfirmDialog } from '@/components/admin/DeleteConfirmDialog';
 import { AddRecordDialog } from '@/components/admin/AddRecordDialog';
 import { formatDurationMinutes } from '@/utils/dateUtils';
 
@@ -69,6 +70,7 @@ export default function PayrollPage() {
   const [hourlyRates, setHourlyRates] = useState<Record<number, string>>({});
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecordWithEmployee | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
   const [isLoadingRecords, setIsLoadingRecords] = useState(false);
@@ -208,6 +210,10 @@ export default function PayrollPage() {
                 setSelectedRecord(record);
                 setEditDialogOpen(true);
               }}
+              onDelete={(record) => {
+                setSelectedRecord(record);
+                setDeleteDialogOpen(true);
+              }}
             />
           )}
 
@@ -260,6 +266,15 @@ export default function PayrollPage() {
           setSelectedRecord(null);
           loadRecords();
         }}
+      />
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        record={selectedRecord}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setSelectedRecord(null);
+        }}
+        onDeleted={loadRecords}
       />
       <AddRecordDialog
         open={addDialogOpen}
